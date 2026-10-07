@@ -1,0 +1,28 @@
+project:
+  name: "PharmaRoute-Opt"
+  version: "0.1.0"
+  description: "Operations Research Decision-Support System for Pharmaceutical Last-Mile Delivery"
+
+vehicle:
+  capacity_weight_kg: 600.0
+  capacity_volume_m3: 3.0
+  max_route_duration_min: 360.0
+  fleet_size: null  # Auto-estimated if null
+
+scenarios:
+  active:
+    - "optimistic"
+    - "mostlikely"
+    - "pessimistic"
+  default: "mostlikely"
+
+solver:
+  backend: "highs"
+  time_limit_sec: 120
+  mip_gap: 0.05
+  allow_soft_tw: true
+
+weights:
+  alpha_distance: 1.0
+  beta_time: 0.5
+  gamma_lateness: 2.0
