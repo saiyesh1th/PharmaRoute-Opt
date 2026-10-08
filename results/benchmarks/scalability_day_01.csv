@@ -1,7 +1,17 @@
-n_customers,method,solver_status,primal_bound_km,dual_bound_km,mip_gap_pct,runtime_sec,vehicles,total_distance_km,total_travel_time_min,late_deliveries,total_lateness_min
-10,Greedy Baseline,Heuristic Complete,72.3,,,0.0002,1,72.3,116.0,0,0.0
-10,Monolithic MILP (HiGHS),Time limit reached,68.1,42.4,37.74,30.029,1,68.1,130.0,0,0.0
-15,Greedy Baseline,Heuristic Complete,106.1,,,0.0003,1,106.1,178.0,0,0.0
-15,Monolithic MILP (HiGHS),Time limit reached,90.1,58.1,35.52,30.1,1,90.1,182.0,0,0.0
-20,Greedy Baseline,Heuristic Complete,119.5,,,0.0003,1,119.5,227.0,2,238.0
-20,Monolithic MILP (HiGHS),Time limit reached,109.2,65.8,39.74,30.148,1,109.2,226.0,2,244.0
+n_customers,method,solver_status,primal_bound_km,dual_bound_km,mip_gap_pct,runtime_sec,vehicles,total_distance_km,total_travel_time_min,late_deliveries,total_lateness_min,time_limit_sec,improvement_pct,nodes_explored
+10,Monolithic MILP (HiGHS),Time limit reached,68.1,42.4,37.74,30.029,1,68.1,130.0,0,0.0,,,
+10,Greedy Baseline,Heuristic Complete,72.3,,,0.0002,1,72.3,116.0,0,0.0,,,
+15,Monolithic MILP (HiGHS),Time limit reached,90.1,58.1,35.52,30.1,1,90.1,182.0,0,0.0,,,
+15,Greedy Baseline,Heuristic Complete,106.1,,,0.0003,1,106.1,178.0,0,0.0,,,
+20,Monolithic MILP (HiGHS),Time limit reached,109.2,65.8,39.74,30.148,1,109.2,226.0,2,244.0,,,
+20,Greedy Baseline,Heuristic Complete,119.5,,,0.0003,1,119.5,227.0,2,238.0,,,
+25,Monolithic MILP (HiGHS),Time limit reached,176.0,68.8,60.91,60.144,2,176.0,335.0,4,139.0,60.0,3.51,2466.0
+25,Greedy Baseline,Heuristic Complete,182.4,,,0.0009,2,182.4,310.0,1,142.0,,0.0,
+30,Monolithic MILP (HiGHS),Time limit reached,227.5,73.6,67.65,60.435,2,227.5,408.0,3,124.0,60.0,-20.31,455.0
+30,Greedy Baseline,Heuristic Complete,189.1,,,0.0005,2,189.1,354.0,0,0.0,,0.0,
+40,Monolithic MILP (HiGHS),Time limit reached,0.0,81.8,,60.332,0,0.0,0.0,0,0.0,60.0,,332.0
+40,Greedy Baseline,Heuristic Complete,226.9,,,0.001,2,226.9,417.0,3,95.0,,0.0,
+50,Monolithic MILP (HiGHS),Time limit reached,0.0,87.8,,60.588,0,0.0,0.0,0,0.0,60.0,,55.0
+50,Greedy Baseline,Heuristic Complete,266.4,,,0.0047,3,266.4,512.0,2,252.0,,0.0,
+78,Monolithic MILP (HiGHS),Time limit reached,0.0,103.6,,137.06,0,0.0,0.0,0,0.0,120.0,,0.0
+78,Greedy Baseline,Heuristic Complete,356.0,,,0.0031,4,356.0,691.0,3,264.0,,0.0,
