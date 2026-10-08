@@ -54,8 +54,8 @@ class CVRPTWModelBuilder:
         tot_v = sum(instance.orders[n].volume_m3 for n in self.customer_nodes)
         min_k_w = int(np.ceil(tot_w / self.config.capacity_weight_kg))
         min_k_v = int(np.ceil(tot_v / self.config.capacity_volume_m3))
-        k_est = max(min_k_w, min_k_v, 2)
-        self.num_vehicles = self.config.fleet_size if self.config.fleet_size is not None else k_est + 1
+        k_est = max(min_k_w, min_k_v, 1)
+        self.num_vehicles = self.config.fleet_size if self.config.fleet_size is not None else k_est
         self.vehicles = list(range(1, self.num_vehicles + 1))
 
         self.problem: Optional[pulp.LpProblem] = None

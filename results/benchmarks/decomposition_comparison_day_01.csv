@@ -1,0 +1,7 @@
+instance_size,method,solver_status,total_distance_km,total_travel_time_min,vehicles_used,late_deliveries,total_lateness_min,on_time_rate_pct,runtime_sec,notes
+25,Greedy Baseline,Heuristic Complete,182.4,310.0,2,1.0,142.0,96.0,0.0006,Greedy sequential construction
+25,Monolithic MILP (HiGHS),Time limit reached,,,0,,,,60.071,No feasible solution within limit
+25,Decomposed MILP (Hybrid),2 Clusters Solved,174.9,327.0,2,0.0,0.0,100.0,40.167,"Cluster solve times: [20.052, 20.046]"
+78,Greedy Baseline,Heuristic Complete,356.0,691.0,4,3.0,264.0,96.15,0.0032,Greedy sequential construction
+78,Monolithic MILP (HiGHS),Time limit reached,,,0,,,,123.076,No feasible solution within limit
+78,Decomposed MILP (Hybrid),6 Clusters Solved,446.7,860.0,6,0.0,0.0,100.0,100.975,"Cluster solve times: [20.078, 0.366, 20.07, 20.086, 20.064, 20.082]"
