@@ -2,31 +2,33 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import pharmaData from './data/pharmaData.json';
 import { 
   Truck, Clock, CheckCircle2, AlertTriangle, Route, ShieldAlert, 
-  Play, Square, ExternalLink, Activity, Search, Compass, Calendar
+  Play, Square, ExternalLink, Activity, Search, Compass, Calendar,
+  ChevronRight, MapPin, Info, ArrowRight
 } from 'lucide-react';
 import './App.css';
 
 const VEHICLE_COLORS = [
   '#38bdf8', // radiant cyan
-  '#818cf8', // soft indigo
+  '#a78bfa', // soft purple
   '#34d399', // emerald
   '#fbbf24', // amber
   '#f472b6', // pink
-  '#a78bfa', // purple
-  '#fb923c', // orange
   '#2dd4bf', // teal
+  '#fb923c', // orange
+  '#60a5fa', // blue
 ];
 
 export default function App() {
-  // Navigation
+  // Navigation Tabs
   const [activeTab, setActiveTab] = useState('routes'); // 'routes', 'benchmark', 'multiobj', 'robustness', 'scalability'
 
   // Route Explorer Filters
   const [day, setDay] = useState(1);
   const [scenario, setScenario] = useState('mostlikely');
   const [engine, setEngine] = useState('decomposed'); // 'decomposed' or 'greedy'
-  const [selectedVehicle, setSelectedVehicle] = useState(0); // 0-indexed, or null for 'all'
+  const [selectedVehicle, setSelectedVehicle] = useState(0); // 0-indexed or null for 'all'
   const [isSimulating, setIsSimulating] = useState(false);
+  const [hoveredNode, setHoveredNode] = useState(null);
   const [searchStop, setSearchStop] = useState('');
   const [tooltip, setTooltip] = useState({ visible: false, x: 0, y: 0, content: null });
 
@@ -46,7 +48,7 @@ export default function App() {
   const altMetrics = runData ? runData[altEngine] : null;
   const routes = useMemo(() => activeMetrics?.routes || [], [activeMetrics]);
 
-  // Reset selected vehicle when changing day or engine if out of bounds
+  // Reset selected vehicle on instance switch
   useEffect(() => {
     if (routes.length && selectedVehicle !== null && selectedVehicle >= routes.length) {
       setSelectedVehicle(0);
@@ -82,11 +84,15 @@ export default function App() {
         volume: Number(volume.toFixed(2)),
         volumePct: Math.min(Math.round((volume / 3.0) * 100), 100),
         shiftMin: shiftTime,
+        shiftPct: Math.min(Math.round((shiftTime / 360) * 100), 100),
         color: VEHICLE_COLORS[idx % VEHICLE_COLORS.length],
         stops
       };
     });
   }, [routes, dayOrders, activeMetrics]);
+
+  // Active Focused Vehicle Data
+  const activeVan = (selectedVehicle !== null && vehicleStats[selectedVehicle]) ? vehicleStats[selectedVehicle] : null;
 
   // Canvas Route Drawing
   useEffect(() => {
@@ -104,24 +110,14 @@ export default function App() {
     const width = rect.width;
     const height = rect.height;
 
-    // Clean Minimal Dark Canvas
-    ctx.fillStyle = '#090e18';
+    // Rich Dark Sapphire Canvas
+    ctx.fillStyle = '#080d17';
     ctx.fillRect(0, 0, width, height);
 
-    // Subtle Grid Lines
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.025)';
-    ctx.lineWidth = 1;
-    for (let x = 0; x < width; x += 48) {
-      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-    }
-    for (let y = 0; y < height; y += 48) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-    }
-
+    // Coordinate Bounding Box
     const coordsList = pharmaData.coords?.[String(day)] || [];
     if (!coordsList.length || !routes.length) return;
 
-    // Coordinate Bounding Box
     const coordsMap = {};
     let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     coordsList.forEach(item => {
@@ -130,7 +126,7 @@ export default function App() {
       minY = Math.min(minY, item.y); maxY = Math.max(maxY, item.y);
     });
 
-    const pad = 48;
+    const pad = 54;
     const scaleX = (width - pad * 2) / (maxX - minX || 1);
     const scaleY = (height - pad * 2) / (maxY - minY || 1);
 
@@ -139,12 +135,42 @@ export default function App() {
       y: pad + (ny - minY) * scaleY
     });
 
-    // 1. Draw Inactive / Ghosted Routes First
+    // Depot Screen Position
+    const depotScreen = toScreen(coordsMap[0]?.x || 0, coordsMap[0]?.y || 0);
+
+    // 1. Concentric Distance Rings around Depot (10 km, 20 km)
+    const kmScale = (scaleX + scaleY) / 2;
+    [10, 20].forEach(km => {
+      const radius = km * kmScale;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+      ctx.setLineDash([4, 6]);
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(depotScreen.x, depotScreen.y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = 'rgba(148, 163, 184, 0.35)';
+      ctx.font = '500 10px JetBrains Mono, monospace';
+      ctx.fillText(`${km} km`, depotScreen.x + radius - 22, depotScreen.y - 4);
+      ctx.restore();
+    });
+
+    // 2. Background Grid
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < width; x += 44) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+    }
+    for (let y = 0; y < height; y += 44) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+    }
+
+    // 3. Draw Ghosted (Inactive) Routes First
     routes.forEach((route, idx) => {
       const isSelected = selectedVehicle === null || selectedVehicle === idx;
-      if (isSelected) return; // Draw selected later for top layering
+      if (isSelected) return;
 
-      // Faint ghosted path
       ctx.strokeStyle = 'rgba(148, 163, 184, 0.12)';
       ctx.lineWidth = 1.2;
       ctx.beginPath();
@@ -156,28 +182,31 @@ export default function App() {
       }
       ctx.stroke();
 
-      // Tiny dots for other stops
+      // Muted background dots
       route.forEach(node => {
         if (node === 0) return;
         const pt = toScreen(coordsMap[node]?.x || 0, coordsMap[node]?.y || 0);
-        ctx.fillStyle = 'rgba(148, 163, 184, 0.25)';
+        ctx.fillStyle = 'rgba(148, 163, 184, 0.2)';
         ctx.beginPath();
         ctx.arc(pt.x, pt.y, 2.5, 0, Math.PI * 2);
         ctx.fill();
       });
     });
 
-    // 2. Draw Active / Selected Routes
+    // 4. Draw Active / Focused Vehicle Routes
     routes.forEach((route, idx) => {
       const isSelected = selectedVehicle === null || selectedVehicle === idx;
       if (!isSelected) return;
 
       const vColor = VEHICLE_COLORS[idx % VEHICLE_COLORS.length];
 
-      // Route Path Line
+      // Route Path Line with Glow
+      ctx.save();
       ctx.strokeStyle = vColor;
-      ctx.lineWidth = selectedVehicle === null ? 2.0 : 3.0;
-      ctx.globalAlpha = selectedVehicle === null ? 0.8 : 1.0;
+      ctx.lineWidth = selectedVehicle === null ? 2.0 : 3.2;
+      ctx.shadowColor = selectedVehicle === null ? 'transparent' : vColor;
+      ctx.shadowBlur = selectedVehicle === null ? 0 : 8;
+      ctx.globalAlpha = selectedVehicle === null ? 0.85 : 1.0;
       ctx.beginPath();
 
       for (let i = 0; i < route.length - 1; i++) {
@@ -187,40 +216,76 @@ export default function App() {
         ctx.lineTo(p2.x, p2.y);
       }
       ctx.stroke();
-      ctx.globalAlpha = 1.0;
+      ctx.restore();
 
-      // Customer Stops
-      let stopSequenceNum = 1;
+      // Directional Arrowheads (when single vehicle selected)
+      if (selectedVehicle === idx) {
+        ctx.save();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        for (let i = 0; i < route.length - 1; i++) {
+          const p1 = toScreen(coordsMap[route[i]]?.x || 0, coordsMap[route[i]]?.y || 0);
+          const p2 = toScreen(coordsMap[route[i + 1]]?.x || 0, coordsMap[route[i + 1]]?.y || 0);
+          const dist = Math.hypot(p2.x - p1.x, p2.y - p1.y);
+
+          if (dist > 30) {
+            const mx = (p1.x + p2.x) / 2;
+            const my = (p1.y + p2.y) / 2;
+            const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+
+            ctx.save();
+            ctx.translate(mx, my);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(-5, -3.5);
+            ctx.lineTo(1, 0);
+            ctx.lineTo(-5, 3.5);
+            ctx.stroke();
+            ctx.restore();
+          }
+        }
+        ctx.restore();
+      }
+
+      // Customer Stops with Sequential Numbers
+      let seqNum = 1;
       route.forEach(node => {
         if (node === 0) return;
         const pt = toScreen(coordsMap[node]?.x || 0, coordsMap[node]?.y || 0);
+        const isHovered = hoveredNode === node;
 
         if (selectedVehicle === idx) {
-          // Numbered badge for focused vehicle
+          // Distinct Numbered Badge
           ctx.save();
           ctx.fillStyle = vColor;
           ctx.shadowColor = vColor;
-          ctx.shadowBlur = 10;
+          ctx.shadowBlur = isHovered ? 18 : 8;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 8.5, 0, Math.PI * 2);
+          ctx.arc(pt.x, pt.y, isHovered ? 11 : 8.5, 0, Math.PI * 2);
           ctx.fill();
 
-          ctx.fillStyle = '#090e18';
-          ctx.font = '700 9px JetBrains Mono, monospace';
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = isHovered ? 2 : 1;
+          ctx.stroke();
+
+          ctx.fillStyle = '#080d17';
+          ctx.font = `700 ${isHovered ? '11px' : '9px'} JetBrains Mono, monospace`;
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(String(stopSequenceNum++), pt.x, pt.y);
+          ctx.fillText(String(seqNum++), pt.x, pt.y);
           ctx.restore();
         } else {
-          // Simple clean dot
+          // Clean dot in "All Routes" view
+          ctx.save();
           ctx.fillStyle = vColor;
           ctx.beginPath();
-          ctx.arc(pt.x, pt.y, 4, 0, Math.PI * 2);
+          ctx.arc(pt.x, pt.y, isHovered ? 6 : 4, 0, Math.PI * 2);
           ctx.fill();
+          ctx.restore();
         }
       });
 
-      // Simulation Pulsing Van
+      // Simulation Animated Van
       if (isSimulating) {
         const totalSegs = route.length - 1;
         const progressVal = (simProgressRef.current * totalSegs) % totalSegs;
@@ -238,7 +303,7 @@ export default function App() {
         ctx.save();
         ctx.fillStyle = '#ffffff';
         ctx.shadowColor = vColor;
-        ctx.shadowBlur = 14;
+        ctx.shadowBlur = 16;
         ctx.beginPath();
         ctx.arc(curX, curY, 6, 0, Math.PI * 2);
         ctx.fill();
@@ -246,31 +311,30 @@ export default function App() {
       }
     });
 
-    // 3. Central Pharmacy Depot (Node 0)
-    const depotPt = toScreen(coordsMap[0]?.x || 0, coordsMap[0]?.y || 0);
+    // 5. Central Pharmacy Depot (Node 0) - Radiant Gold Landmark
     ctx.save();
     ctx.fillStyle = '#fbbf24';
     ctx.shadowColor = '#fbbf24';
-    ctx.shadowBlur = 16;
+    ctx.shadowBlur = 20;
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.2;
 
-    const sz = 9;
+    const sz = 10;
     ctx.beginPath();
-    ctx.moveTo(depotPt.x, depotPt.y - sz);
-    ctx.lineTo(depotPt.x + sz, depotPt.y);
-    ctx.lineTo(depotPt.x, depotPt.y + sz);
-    ctx.lineTo(depotPt.x - sz, depotPt.y);
+    ctx.moveTo(depotScreen.x, depotScreen.y - sz);
+    ctx.lineTo(depotScreen.x + sz, depotScreen.y);
+    ctx.lineTo(depotScreen.x, depotScreen.y + sz);
+    ctx.lineTo(depotScreen.x - sz, depotScreen.y);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
     ctx.fillStyle = '#ffffff';
     ctx.font = '700 11px Plus Jakarta Sans, sans-serif';
-    ctx.fillText('DEPOT (HUB)', depotPt.x - 36, depotPt.y - 14);
+    ctx.fillText('DEPOT (HUB)', depotScreen.x - 38, depotScreen.y - 15);
     ctx.restore();
 
-  }, [day, scenario, engine, activeTab, selectedVehicle, isSimulating, routes]);
+  }, [day, scenario, engine, activeTab, selectedVehicle, isSimulating, routes, hoveredNode]);
 
   // Simulation Animation Loop
   useEffect(() => {
@@ -310,12 +374,12 @@ export default function App() {
       minY = Math.min(minY, item.y); maxY = Math.max(maxY, item.y);
     });
 
-    const pad = 48;
+    const pad = 54;
     const scaleX = (rect.width - pad * 2) / (maxX - minX || 1);
-    const scaleY = (rect.height - pad * 2) / (maxY - minY || 1);
+    const scaleY = (height - pad * 2) / (maxY - minY || 1);
 
     let closest = null;
-    let minDist = 16;
+    let minDist = 18;
 
     coordsList.forEach(item => {
       const scrX = pad + (item.x - minX) * scaleX;
@@ -328,6 +392,7 @@ export default function App() {
     });
 
     if (closest) {
+      setHoveredNode(closest.node);
       const ord = dayOrders[String(closest.node)] || {};
       setTooltip({
         visible: true,
@@ -335,14 +400,14 @@ export default function App() {
         y: closest.screenY,
         content: closest.node === 0 ? (
           <div>
-            <div style={{ fontWeight: 700, color: '#fbbf24', fontSize: '0.84rem' }}>🏥 Central Pharmacy Hub</div>
-            <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Base Distribution Depot</div>
+            <div style={{ fontWeight: 700, color: '#fbbf24', fontSize: '0.84rem' }}>🏥 Athens Central Hub</div>
+            <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>Base Pharmacy Depot • Departs & Returns Here</div>
           </div>
         ) : (
           <div>
             <div style={{ fontWeight: 700, color: '#38bdf8', fontSize: '0.84rem' }}>Clinic #{closest.node}</div>
             <div style={{ fontSize: '0.74rem', color: '#cbd5e1', lineHeight: 1.5, marginTop: '4px' }}>
-              • Delivery Window: [{ord.eat || 0} - {ord.lat || 0}] min<br />
+              • Time Window: [{ord.eat || 0} - {ord.lat || 0}] min<br />
               • Payload: {ord.weight || 0} kg • {ord.volume || 0} m³<br />
               • Service Time: {ord.service_time || 0} min
             </div>
@@ -350,11 +415,39 @@ export default function App() {
         )
       });
     } else {
+      setHoveredNode(null);
       setTooltip(prev => ({ ...prev, visible: false }));
     }
   };
 
-  // Selected Route Stops for Table
+  // Chronological Tour Steps for Focused Van
+  const tourTimelineSteps = useMemo(() => {
+    if (selectedVehicle === null || !routes[selectedVehicle]) return [];
+    const r = routes[selectedVehicle];
+    let stepCount = 1;
+    return r.map((node, i) => {
+      const isDepot = node === 0;
+      const isStart = isDepot && i === 0;
+      const isEnd = isDepot && i === r.length - 1;
+      const ord = dayOrders[String(node)] || {};
+
+      return {
+        key: `${node}-${i}`,
+        node,
+        isDepot,
+        isStart,
+        isEnd,
+        stepNumber: isDepot ? (isStart ? '0' : 'End') : String(stepCount++),
+        eat: ord.eat || 0,
+        lat: ord.lat || 0,
+        weight: ord.weight || 0,
+        volume: ord.volume || 0,
+        service: ord.service_time || 0
+      };
+    });
+  }, [routes, selectedVehicle, dayOrders]);
+
+  // Filtered Table Rows
   const tableStops = useMemo(() => {
     let rawList = [];
     if (selectedVehicle !== null && routes[selectedVehicle]) {
@@ -464,15 +557,38 @@ export default function App() {
         </div>
       </header>
 
-      {/* Main Workspace */}
+      {/* Main Expansive Container */}
       <main className="main-container">
-        
+
         {/* =========================================================================
             TAB 1: ROUTE EXPLORER
            ========================================================================= */}
         {activeTab === 'routes' && (
           <div>
-            {/* Clean Horizontal Filter Bar */}
+            {/* Plain-English 3-Step Explainer Banner */}
+            <div className="explainer-banner">
+              <div className="explainer-steps">
+                <div className="explainer-step">
+                  <span className="step-circle">1</span>
+                  <span><strong>Central Hub:</strong> Van loads cold-chain supplies at Athens Hub</span>
+                </div>
+                <ChevronRight size={14} color="#64748b" />
+                <div className="explainer-step">
+                  <span className="step-circle">2</span>
+                  <span><strong>Smart Clustering:</strong> Nearby clinics grouped into balanced zones</span>
+                </div>
+                <ChevronRight size={14} color="#64748b" />
+                <div className="explainer-step">
+                  <span className="step-circle">3</span>
+                  <span><strong>Guaranteed Delivery:</strong> Van serves stops in sequence (1 → 2 → 3) before deadlines</span>
+                </div>
+              </div>
+              <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                Instance: <strong>Day {day} ({pharmaData.orders?.[String(day)] ? Object.keys(pharmaData.orders[String(day)]).length : 0} Clinics)</strong>
+              </div>
+            </div>
+
+            {/* Horizontal Control Filter Bar */}
             <div className="control-bar">
               <div className="control-bar-left">
                 {/* Day Selector */}
@@ -531,7 +647,7 @@ export default function App() {
               </div>
 
               <div style={{ fontSize: '0.76rem', color: '#94a3b8' }}>
-                Instance: <strong>Day {day} ({pharmaData.orders?.[String(day)] ? Object.keys(pharmaData.orders[String(day)]).length : 0} Clinics)</strong> • Mode: <strong style={{ textTransform: 'capitalize' }}>{scenario}</strong>
+                Traffic Setting: <strong style={{ textTransform: 'capitalize', color: '#ffffff' }}>{scenario}</strong> • Engine: <strong style={{ color: '#38bdf8' }}>{engine === 'decomposed' ? 'Decomposed MILP' : 'Greedy Baseline'}</strong>
               </div>
             </div>
 
@@ -552,7 +668,7 @@ export default function App() {
                       {((activeMetrics?.distance_km || 0) - (altMetrics?.distance_km || 0)).toFixed(1)} km vs Greedy
                     </span>
                   ) : (
-                    <span>Baseline greedy packing</span>
+                    <span>Greedy sequential dispatch</span>
                   )}
                 </div>
               </div>
@@ -566,7 +682,7 @@ export default function App() {
                   {activeMetrics?.travel_time_min?.toFixed(0) || 0} <span style={{ fontSize: '1rem', fontWeight: 500, color: '#94a3b8' }}>min</span>
                 </div>
                 <div className="kpi-subtext">
-                  <span>{((activeMetrics?.travel_time_min || 0) / 60).toFixed(1)} fleet hours total</span>
+                  <span>{((activeMetrics?.travel_time_min || 0) / 60).toFixed(1)} total fleet hours</span>
                 </div>
               </div>
 
@@ -588,88 +704,226 @@ export default function App() {
 
               <div className="kpi-card">
                 <div className="kpi-header">
-                  <span className="kpi-title">Vehicles</span>
+                  <span className="kpi-title">Fleet Size</span>
                   <span className="kpi-icon">🚐</span>
                 </div>
                 <div className="kpi-value">
                   {routes.length} <span style={{ fontSize: '1rem', fontWeight: 500, color: '#94a3b8' }}>vans</span>
                 </div>
                 <div className="kpi-subtext">
-                  <span>{activeMetrics?.clusters ? `${activeMetrics.clusters} spatial clusters` : 'Sequential routes'}</span>
+                  <span>{activeMetrics?.clusters ? `${activeMetrics.clusters} spatial clusters` : 'Sequential loops'}</span>
                 </div>
               </div>
             </div>
 
-            {/* One Large Route Visualization */}
-            <div className="map-panel">
-              <div className="map-header">
-                <div className="map-header-left">
-                  <span className="map-title">
-                    <Route size={16} /> Spatial Route Network
-                  </span>
-                  <span className="map-subtitle">
-                    {selectedVehicle === null 
-                      ? `Displaying all ${routes.length} vehicle routes. Select a vehicle below to inspect its individual delivery tour.`
-                      : `Inspecting Vehicle ${selectedVehicle + 1} (${vehicleStats[selectedVehicle]?.stopsCount || 0} stops in sequence). Non-selected routes are dimmed.`
-                    }
-                  </span>
-                </div>
-
-                <div className="map-controls-right">
-                  {/* Vehicle selector pills */}
-                  <div className="vehicle-selector-pills">
-                    <button 
-                      className={`van-pill ${selectedVehicle === null ? 'active' : ''}`}
-                      onClick={() => setSelectedVehicle(null)}
-                    >
-                      All Routes
-                    </button>
-                    {routes.map((_, idx) => (
-                      <button 
-                        key={idx}
-                        className={`van-pill ${selectedVehicle === idx ? 'active' : ''}`}
-                        onClick={() => setSelectedVehicle(idx)}
-                      >
-                        <span className="color-dot" style={{ backgroundColor: VEHICLE_COLORS[idx % VEHICLE_COLORS.length] }} />
-                        Van {idx + 1}
-                      </button>
-                    ))}
+            {/* SIDE-BY-SIDE ROUTE WORKSPACE (MAP + VAN TOUR INSPECTOR) */}
+            <div className="route-workspace-grid">
+              {/* Map Panel (Left) */}
+              <div className="map-panel">
+                <div className="map-header">
+                  <div className="map-header-left">
+                    <span className="map-title">
+                      <Route size={16} /> Spatial Route Network (Athens Metropolitan Area)
+                    </span>
+                    <span className="map-subtitle">
+                      {selectedVehicle === null 
+                        ? `Displaying all ${routes.length} vehicle routes. Click any Van pill to focus its sequential tour.`
+                        : `Inspecting Van ${selectedVehicle + 1} (${activeVan?.stopsCount || 0} stops in sequence). Non-selected routes are dimmed in the background.`
+                      }
+                    </span>
                   </div>
 
-                  {/* Play Simulation Button */}
-                  <button 
-                    className={`sim-btn ${isSimulating ? 'running' : ''}`}
-                    onClick={() => setIsSimulating(!isSimulating)}
-                  >
-                    {isSimulating ? <Square size={13} /> : <Play size={13} />}
-                    {isSimulating ? 'Stop Simulation' : 'Play Simulation'}
-                  </button>
+                  <div className="map-controls-right">
+                    {/* Vehicle selector pills */}
+                    <div className="vehicle-selector-pills">
+                      <button 
+                        className={`van-pill ${selectedVehicle === null ? 'active' : ''}`}
+                        onClick={() => setSelectedVehicle(null)}
+                      >
+                        All Routes
+                      </button>
+                      {routes.map((_, idx) => (
+                        <button 
+                          key={idx}
+                          className={`van-pill ${selectedVehicle === idx ? 'active' : ''}`}
+                          onClick={() => setSelectedVehicle(idx)}
+                        >
+                          <span className="color-dot" style={{ backgroundColor: VEHICLE_COLORS[idx % VEHICLE_COLORS.length] }} />
+                          Van {idx + 1}
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Simulation Button */}
+                    <button 
+                      className={`sim-btn ${isSimulating ? 'running' : ''}`}
+                      onClick={() => setIsSimulating(!isSimulating)}
+                    >
+                      {isSimulating ? <Square size={13} /> : <Play size={13} />}
+                      {isSimulating ? 'Stop Van' : 'Simulate'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="canvas-container">
+                  <canvas 
+                    ref={canvasRef} 
+                    className="route-canvas" 
+                    onMouseMove={handleCanvasMouseMove}
+                    onMouseLeave={() => { setHoveredNode(null); setTooltip(prev => ({ ...prev, visible: false })); }}
+                  />
+
+                  {/* Floating Legend */}
+                  <div className="map-floating-legend">
+                    <div className="legend-item">
+                      <span className="legend-icon-hub">⬨</span>
+                      <span>Depot (Hub)</span>
+                    </div>
+                    <div className="legend-item">
+                      <span className="legend-icon-stop" />
+                      <span>Delivery Stop</span>
+                    </div>
+                    <div className="legend-item">
+                      <span style={{ color: '#38bdf8', fontWeight: 800 }}>➔</span>
+                      <span>Travel Direction</span>
+                    </div>
+                  </div>
+
+                  {tooltip.visible && (
+                    <div 
+                      className="map-tooltip" 
+                      style={{ left: tooltip.x, top: tooltip.y }}
+                    >
+                      {tooltip.content}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="canvas-container">
-                <canvas 
-                  ref={canvasRef} 
-                  className="route-canvas" 
-                  onMouseMove={handleCanvasMouseMove}
-                  onMouseLeave={() => setTooltip(prev => ({ ...prev, visible: false }))}
-                />
+              {/* Van Tour Inspector Card (Right Column) */}
+              <div className="tour-inspector-card">
+                <div className="inspector-header">
+                  <div className="inspector-title-box">
+                    <span 
+                      className="color-dot" 
+                      style={{ 
+                        backgroundColor: activeVan ? activeVan.color : '#38bdf8',
+                        width: '10px',
+                        height: '10px'
+                      }} 
+                    />
+                    <span className="inspector-title">
+                      {activeVan ? `Van ${activeVan.id + 1} Delivery Tour` : 'Fleet Overview'}
+                    </span>
+                  </div>
+                  <span className="inspector-badge">
+                    {activeVan ? `${activeVan.stopsCount} Clinics` : `${routes.length} Vans Dispatched`}
+                  </span>
+                </div>
 
-                {tooltip.visible && (
-                  <div 
-                    className="map-tooltip" 
-                    style={{ left: tooltip.x, top: tooltip.y }}
-                  >
-                    {tooltip.content}
+                {/* Capacity Gauges for Selected Van */}
+                {activeVan && (
+                  <div className="inspector-gauges">
+                    <div className="gauge-row">
+                      <div className="gauge-labels">
+                        <span>Payload Weight</span>
+                        <span><strong>{activeVan.weight} kg</strong> / 600 kg ({activeVan.weightPct}%)</span>
+                      </div>
+                      <div className="gauge-track">
+                        <div 
+                          className="gauge-fill" 
+                          style={{ width: `${activeVan.weightPct}%`, backgroundColor: activeVan.color }} 
+                        />
+                      </div>
+                    </div>
+
+                    <div className="gauge-row">
+                      <div className="gauge-labels">
+                        <span>Cargo Volume</span>
+                        <span><strong>{activeVan.volume} m³</strong> / 3.0 m³ ({activeVan.volumePct}%)</span>
+                      </div>
+                      <div className="gauge-track">
+                        <div 
+                          className="gauge-fill" 
+                          style={{ width: `${activeVan.volumePct}%`, backgroundColor: '#38bdf8' }} 
+                        />
+                      </div>
+                    </div>
+
+                    <div className="gauge-row">
+                      <div className="gauge-labels">
+                        <span>Est. Shift Duration</span>
+                        <span><strong>{activeVan.shiftMin} min</strong> / 360 min ({activeVan.shiftPct}%)</span>
+                      </div>
+                      <div className="gauge-track">
+                        <div 
+                          className="gauge-fill" 
+                          style={{ width: `${activeVan.shiftPct}%`, backgroundColor: '#10b981' }} 
+                        />
+                      </div>
+                    </div>
                   </div>
                 )}
+
+                {/* Step-by-Step Chronological Tour Timeline */}
+                <div className="tour-timeline-container">
+                  <div style={{ fontSize: '0.74rem', fontWeight: 700, color: '#94a3b8', marginBottom: '4px' }}>
+                    CHRONOLOGICAL DELIVERY SEQUENCE
+                  </div>
+
+                  {tourTimelineSteps.map(step => (
+                    <div 
+                      key={step.key} 
+                      className="timeline-step"
+                      onMouseEnter={() => setHoveredNode(step.node)}
+                      onMouseLeave={() => setHoveredNode(null)}
+                      style={{
+                        borderColor: hoveredNode === step.node ? 'rgba(56, 189, 248, 0.4)' : 'transparent',
+                        background: hoveredNode === step.node ? 'rgba(56, 189, 248, 0.08)' : undefined
+                      }}
+                    >
+                      <div 
+                        className="timeline-step-badge"
+                        style={{
+                          backgroundColor: step.isDepot ? '#fbbf24' : (activeVan ? activeVan.color : '#38bdf8'),
+                          color: '#080d17'
+                        }}
+                      >
+                        {step.stepNumber}
+                      </div>
+                      <div className="timeline-step-content">
+                        <div className="timeline-step-name">
+                          {step.isDepot 
+                            ? (step.isStart ? 'Depart: Athens Central Hub' : 'Return: Athens Central Hub') 
+                            : `Clinic #${step.node}`
+                          }
+                        </div>
+                        {!step.isDepot && (
+                          <div className="timeline-step-meta">
+                            <span>Window: [{step.eat}-{step.lat}]m</span>
+                            <span>•</span>
+                            <span>{step.weight} kg</span>
+                            <span>•</span>
+                            <span style={{ color: '#34d399' }}>✓ On Time</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {selectedVehicle === null && (
+                    <div style={{ fontSize: '0.78rem', color: '#94a3b8', padding: '16px 0', textAlign: 'center' }}>
+                      Click on any Van above (Van 1, Van 2...) to inspect its turn-by-turn clinic stop sequence.
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
-            {/* Vehicle Fleet Cards Overview */}
+            {/* Fleet Vehicles Overview Cards */}
             <div className="vehicles-section">
               <div className="section-heading">
-                <Truck size={15} /> Dispatched Vehicles ({vehicleStats.length})
+                <Truck size={15} /> All Dispatched Fleet Vehicles ({vehicleStats.length})
               </div>
               <div className="vehicles-grid">
                 {vehicleStats.map(v => (
@@ -686,52 +940,27 @@ export default function App() {
                       <span className="vehicle-stops-badge">{v.stopsCount} stops</span>
                     </div>
 
-                    <div className="vehicle-metric-bars">
-                      <div className="metric-bar-item">
-                        <div className="metric-bar-labels">
-                          <span>Payload Weight</span>
-                          <span>{v.weight} kg ({v.weightPct}%)</span>
-                        </div>
-                        <div className="metric-bar-track">
-                          <div 
-                            className="metric-bar-fill" 
-                            style={{ width: `${v.weightPct}%`, backgroundColor: v.color }} 
-                          />
-                        </div>
-                      </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: '#94a3b8' }}>
+                      <span>Weight: <strong>{v.weight} kg</strong> ({v.weightPct}%)</span>
+                      <span>Vol: <strong>{v.volume} m³</strong> ({v.volumePct}%)</span>
+                    </div>
 
-                      <div className="metric-bar-item">
-                        <div className="metric-bar-labels">
-                          <span>Cargo Volume</span>
-                          <span>{v.volume} m³ ({v.volumePct}%)</span>
-                        </div>
-                        <div className="metric-bar-track">
-                          <div 
-                            className="metric-bar-fill" 
-                            style={{ width: `${v.volumePct}%`, backgroundColor: '#38bdf8' }} 
-                          />
-                        </div>
-                      </div>
-
-                      <div className="metric-bar-item">
-                        <div className="metric-bar-labels">
-                          <span>Est. Shift Time</span>
-                          <span>{v.shiftMin} min</span>
-                        </div>
-                      </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.74rem', color: '#94a3b8' }}>
+                      <span>Shift: <strong>{v.shiftMin} min</strong></span>
+                      <span style={{ color: '#34d399', fontWeight: 600 }}>✓ On Schedule</span>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Delivery Schedule Table */}
+            {/* Full Clinic Delivery Schedule Table */}
             <div className="schedule-panel">
               <div className="table-header-bar">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Clock size={15} color="#94a3b8" />
                   <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#ffffff' }}>
-                    {selectedVehicle !== null ? `Delivery Sequence: Vehicle ${selectedVehicle + 1}` : 'All Dispatched Stops'}
+                    {selectedVehicle !== null ? `Delivery Schedule: Vehicle ${selectedVehicle + 1}` : 'All Clinic Delivery Stops'}
                   </span>
                   <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>({tableStops.length} stops)</span>
                 </div>
@@ -740,7 +969,7 @@ export default function App() {
                   <Search size={14} color="#64748b" />
                   <input 
                     type="text" 
-                    placeholder="Filter clinic ID..." 
+                    placeholder="Search clinic ID..." 
                     value={searchStop}
                     onChange={e => setSearchStop(e.target.value)}
                     className="table-search-input"
