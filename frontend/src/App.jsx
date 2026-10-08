@@ -38,8 +38,9 @@ export default function App() {
   const [day, setDay] = useState(1);
   const [scenario, setScenario] = useState('mostlikely');
   const [engine, setEngine] = useState('decomposed');
-  const [selectedVehicle, setSelectedVehicle] = useState(0); // 0-indexed, or null for 'all'
-  const [showBackgroundRoutes, setShowBackgroundRoutes] = useState(true);
+  const [selectedVehicle, setSelectedVehicle] = useState(1); // Default to Van 2 (16 stops tour)
+  const [showBackgroundRoutes, setShowBackgroundRoutes] = useState(false); // Clean focus by default
+  const [mapTheme, setMapTheme] = useState('dark'); // 'dark' (Esri) or 'street' (OSM)
   const [isSimulating, setIsSimulating] = useState(false);
   const [activeMarkerNode, setActiveMarkerNode] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -51,6 +52,7 @@ export default function App() {
   // Refs for Leaflet Map
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const tileLayerRef = useRef(null);
   const routesLayerRef = useRef(null);
   const markersLayerRef = useRef(null);
   const simMarkerRef = useRef(null);
@@ -130,11 +132,14 @@ export default function App() {
         attributionControl: false
       });
 
-      // CartoDB Dark Matter Tiles (High-contrast, elegant dark cartography)
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        maxZoom: 19,
-        subdomains: 'abcd'
+      // Esri World Dark Gray Base Tiles (Zero API Key, Zero Watermarks, Clean Enterprise GIS)
+      const esriUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+      const tileLayer = L.tileLayer(esriUrl, {
+        maxZoom: 16,
+        attribution: '&copy; Esri &mdash; Esri, DeLorme, NAVTEQ'
       }).addTo(map);
+
+      tileLayerRef.current = tileLayer;
 
       // Add Zoom Control at bottom right
       L.control.zoom({ position: 'bottomright' }).addTo(map);
@@ -151,6 +156,14 @@ export default function App() {
     }, 100);
 
   }, [activeTab]);
+
+  // Handle Dynamic Map Theme Switcher (Esri Dark Gray vs OSM)
+  useEffect(() => {
+    if (!tileLayerRef.current) return;
+    const esriUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+    const osmUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+    tileLayerRef.current.setUrl(mapTheme === 'dark' ? esriUrl : osmUrl);
+  }, [mapTheme]);
 
   // Render Routes and Markers on Leaflet Map
   useEffect(() => {
@@ -686,13 +699,22 @@ export default function App() {
                       ))}
                     </div>
 
+                    {/* Map Theme Toggle */}
+                    <button 
+                      className="tool-btn"
+                      onClick={() => setMapTheme(mapTheme === 'dark' ? 'street' : 'dark')}
+                      title="Switch Map Theme (Esri Dark Gray / OpenStreetMap)"
+                    >
+                      {mapTheme === 'dark' ? '🗺️ Street View' : '🌑 Dark Gray'}
+                    </button>
+
                     {/* Toggle Background Routes */}
                     <button 
                       className={`tool-btn ${showBackgroundRoutes ? 'active' : ''}`}
                       onClick={() => setShowBackgroundRoutes(!showBackgroundRoutes)}
-                      title="Toggle faint background routes"
+                      title="Toggle background fleet network"
                     >
-                      <Layers size={13} /> Network
+                      <Layers size={13} /> {showBackgroundRoutes ? 'Isolate Van' : 'Show Network'}
                     </button>
 
                     {/* Live Simulation Button */}
@@ -702,7 +724,7 @@ export default function App() {
                       disabled={selectedVehicle === null}
                     >
                       {isSimulating ? <Square size={13} /> : <Play size={13} />}
-                      {isSimulating ? 'Stop Van' : 'Simulate'}
+                      {isSimulating ? 'Stop' : 'Simulate'}
                     </button>
                   </div>
                 </div>
