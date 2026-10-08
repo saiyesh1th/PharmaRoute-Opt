@@ -1,12 +1,20 @@
 # Mathematical Formulation: Capacitated Vehicle Routing Problem with Time Windows (CVRPTW)
 
-## 1. Operations Research Problem Classification
+## 1. Operations Research Problem Classification & Research Questions
 The core problem in **PharmaRoute-Opt** is mathematically classified as a **Capacitated Vehicle Routing Problem with Time Windows and Service Times (CVRPTW-S)** under traffic-dependent travel times.
 
 It integrates three classical Operations Research problem families into a unified Mixed-Integer Linear Program (MILP):
 1. **Assignment Problem:** Partitioning $n$ pharmaceutical orders across $m$ vehicles respecting vehicle capacities.
 2. **Vehicle Routing & Subtour Elimination:** Finding Hamiltonian subpaths from and to the depot without disjoint loops.
 3. **Temporal Scheduling:** Propagating service durations and traffic transit times under rigid delivery deadlines.
+
+### Formal Operations Research Research Questions (RQs)
+* **RQ1 (Feasibility & Routing):** How effectively can a MILP-based CVRPTW model generate feasible pharmaceutical delivery routes while satisfying vehicle capacity and customer time-window constraints?
+* **RQ2 (Computational Scalability):** How does the computational performance and optimality gap of the monolithic MILP formulation change as the number of customers increases?
+* **RQ3 (Heuristic vs. Exact Comparison):** How does the MILP solution compare with a greedy nearest-neighbor heuristic in terms of distance, travel time, lateness, vehicle utilization, and computational effort?
+* **RQ4 (Multi-Objective Trade-Offs):** How do different priorities assigned to distance ($\alpha$), travel time ($\beta$), and lateness ($\gamma$) affect the resulting delivery plans?
+* **RQ5 (Traffic Uncertainty):** How does traffic variation affect route performance and delivery punctuality across the nine daily instances?
+* **RQ6 (Plan Robustness):** How robust is a delivery plan optimized under expected traffic when it is executed under pessimistic traffic conditions?
 
 ---
 
@@ -15,7 +23,7 @@ It integrates three classical Operations Research problem families into a unifie
 ### Sets
 * $V = \{0, 1, 2, \dots, n\}$: Complete vertex set, where $0$ represents the central pharmaceutical depot.
 * $V_c = \{1, 2, \dots, n\} = V \setminus \{0\}$: Set of customer pharmacies to be serviced.
-* $K = \{1, 2, \dots, m\}$: Set of homogeneous/heterogeneous delivery vehicles.
+* $K = \{1, 2, \dots, m\}$: Set of available delivery vehicles.
 * $A = \{(i, j) \in V \times V : i \neq j\}$: Set of directed arcs connecting nodes.
 
 ### Parameters
@@ -26,9 +34,9 @@ It integrates three classical Operations Research problem families into a unifie
 * $s_i \ge 0$: Service and handover time at pharmacy $i$ in minutes ($s_0 = 0$).
 * $e_i \ge 0$: Earliest Allowed Arrival Time (EAT) in minutes from 08:00 AM.
 * $l_i \ge 0$: Latest Allowed Arrival Time (LAT) in minutes from 08:00 AM.
-* $C_w$: Maximum vehicle payload weight capacity (e.g. $600$ kg).
-* $C_v$: Maximum vehicle cargo volume capacity (e.g. $3.0\text{ m}^3$).
-* $T_{\max}$: Maximum vehicle shift duration (e.g. $360$ minutes / 6 hours).
+* $C_w$: Maximum vehicle payload weight capacity ($600$ kg).
+* $C_v$: Maximum vehicle cargo volume capacity ($3.0\text{ m}^3$).
+* $T_{\max}$: Maximum vehicle shift duration ($360$ minutes / 6 hours).
 * $M$: A sufficiently large positive scalar ($M \ge T_{\max} + \max_{(i,j)} t_{ij}$).
 
 ---
@@ -46,7 +54,7 @@ L_i &\ge 0 && \forall i \in V_c \quad (\text{Lateness in minutes beyond deadline
 
 ## 4. Objective Function
 
-### Multi-Objective Formulation (Goal Programming / Normalized Scalarization)
+### 4.1 Multi-Objective Weighted-Sum Scalarization
 To avoid unit-incommensurability between kilometers, minutes, and penalty units, objectives are normalized relative to baseline reference values $(D_0, T_0, L_0)$:
 
 $$\min Z = \alpha \left(\frac{D}{D_0}\right) + \beta \left(\frac{T}{T_0}\right) + \gamma \left(\frac{L}{L_0 + \epsilon}\right)$$
@@ -59,6 +67,15 @@ where:
 * **Total Lateness ($L$):**
   $$L = \sum_{i \in V_c} L_i$$
 * **Weights:** $\alpha \ge 0, \beta \ge 0, \gamma \ge 0$ such that $\alpha + \beta + \gamma = 1$.
+
+### 4.2 Goal Programming Extension (Target Aspiration Levels)
+In a formal Goal Programming formulation, target aspirations $D^*, T^*, L^*$ are established with over-achievement and under-achievement deviation variables ($d^+, d^-$):
+$$\begin{aligned}
+D - d_D^+ + d_D^- &= D^* \\
+T - d_T^+ + d_T^- &= T^* \\
+L - d_L^+ + d_L^- &= L^*
+\end{aligned}$$
+minimizing the weighted penalty of undesired deviations: $\min P_1 d_D^+ + P_2 d_T^+ + P_3 d_L^+$.
 
 ---
 
@@ -110,4 +127,4 @@ For any generated delivery plan $X$:
 2. **Route Stability / Arc Jaccard Metric:**
    $$J(A_1, A_2) = \frac{|A_1 \cap A_2|}{|A_1 \cup A_2|}, \quad \text{RouteChange} = 1 - J(A_1, A_2)$$
 3. **Cross-Scenario Feasibility Stress Test:**
-   Evaluate the solution vector $X_{\text{ML}}^*$ computed under Most-Likely traffic against the travel-time matrix $T_{\text{pessimistic}}$ to measure how delays propagate in real-world operations.
+   Evaluate the solution vector $X_{\text{ML}}^*$ computed under Most-Likely traffic against the travel-time matrix $T_{\text{pessimistic}}$ to measure schedule fragility.

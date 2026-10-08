@@ -1,0 +1,7 @@
+n_customers,method,solver_status,primal_bound_km,dual_bound_km,mip_gap_pct,runtime_sec,vehicles,total_distance_km,total_travel_time_min,late_deliveries,total_lateness_min
+10,Greedy Baseline,Heuristic Complete,72.3,,,0.0002,1,72.3,116.0,0,0.0
+10,Monolithic MILP (HiGHS),Time limit reached,68.1,42.4,37.74,30.029,1,68.1,130.0,0,0.0
+15,Greedy Baseline,Heuristic Complete,106.1,,,0.0003,1,106.1,178.0,0,0.0
+15,Monolithic MILP (HiGHS),Time limit reached,90.1,58.1,35.52,30.1,1,90.1,182.0,0,0.0
+20,Greedy Baseline,Heuristic Complete,119.5,,,0.0003,1,119.5,227.0,2,238.0
+20,Monolithic MILP (HiGHS),Time limit reached,109.2,65.8,39.74,30.148,1,109.2,226.0,2,244.0
