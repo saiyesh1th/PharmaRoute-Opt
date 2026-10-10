@@ -46,8 +46,9 @@ PharmaRoute-Opt/
 │   │   ├── nearest_neighbor.py
 │   │   └── evaluation.py
 │   ├── optimization/                   # MILP model with PuLP & HiGHS
-│   │   ├── model.py
-│   │   └── solver.py
+│   │   ├── model.py                    # CVRPTW-S formulation (Dual knapsack, MTZ subtours)
+│   │   ├── solver.py                   # Solver interface (HiGHS wrapper)
+│   │   └── decomposition.py            # Feasibility-aware cluster-first decomposition
 │   ├── scenarios/                      # Multi-scenario traffic manager
 │   │   └── traffic.py
 │   ├── evaluation/                     # Metric calculations and robustness stress tests
@@ -55,10 +56,27 @@ PharmaRoute-Opt/
 │   │   └── robustness.py
 │   └── visualization/                  # Route sequence visualizers
 │       └── routes.py
-├── experiments/
-│   └── configs/                        # YAML experiment parameter files
-├── results/                            # Output CSV tables, metrics, and comparisons
-├── tests/                              # Pytest test suite
+├── frontend/                           # Production React + Leaflet GIS Command Center
+│   ├── src/
+│   │   ├── App.jsx                     # Interactive GIS map, Gantt timeline, RQs tabs
+│   │   ├── App.css                     # High-grade dark cartography stylesheet
+│   │   └── data/pharmaData.json        # Precomputed benchmark database (all 27 runs)
+│   └── package.json
+├── web/                                # Standalone zero-dependency web dashboard
+│   ├── index.html                      # Native HTML5 / Chart.js dashboard
+│   ├── index.css                       # Responsive glassmorphic styles
+│   ├── index.js                        # Client routing and spatial canvas
+│   └── data/pharma_data.js             # Embedded JSON data bundle
+├── experiments/                        # Benchmark & research experiment scripts
+│   ├── run_scalability_study.py        # Monolithic MILP tractability vs problem size
+│   ├── run_multiobjective_sweep.py     # Parametric weights (alpha, beta, gamma)
+│   ├── run_decomposition_benchmark.py  # 25-node and 78-node decomposition tests
+│   ├── run_nine_day_benchmark.py       # Full 27-instance evaluation across all 9 days
+│   └── run_robustness_stress_test.py   # Traffic gridlock shock simulation
+├── results/                            # Benchmark CSV summaries and figures
+│   ├── benchmarks/                     # CSV tables for all 27 runs and stress tests
+│   └── figures/                        # Matplotlib / Seaborn comparison charts
+├── tests/                              # Pytest test suite (100% passing)
 └── docs/                               # Detailed mathematical & dataset documentation
     ├── dataset.md
     └── mathematical_model.md
@@ -68,7 +86,7 @@ PharmaRoute-Opt/
 
 ## 3. Quick Start & Execution
 
-### 3.1 Installation
+### 3.1 Installation (Python Environment)
 ```bash
 py -m pip install -r requirements.txt
 ```
@@ -78,26 +96,64 @@ py -m pip install -r requirements.txt
 py -m pytest tests/
 ```
 
-### 3.3 Run Heuristic Baseline for Day 1
+### 3.3 Run Optimization Benchmarks via CLI
 ```bash
+# Run baseline heuristic for Day 1
 py run_experiment.py --day 1 --scenario mostlikely
+
+# Run multi-scenario traffic comparison & stress test
+py run_experiment.py --day 1 --mode scenarios
+
+# Run full 9-day x 3-scenario benchmark (27 instances)
+py experiments/run_nine_day_benchmark.py
+
+# Run multi-objective weight sweep (RQ4)
+py experiments/run_multiobjective_sweep.py
+
+# Run severe traffic stress test (RQ6)
+py experiments/run_robustness_stress_test.py
 ```
 
-### 3.4 Run Multi-Scenario Traffic & Robustness Stress Test
+### 3.4 Launch Decision Support Web Interfaces
+
+#### Option A: Production React + Leaflet GIS Dashboard (Recommended)
 ```bash
-py run_experiment.py --day 1 --mode scenarios
+cd frontend
+npm install
+npm run dev
+# Opens live at http://localhost:5173/
+```
+
+#### Option B: Standalone Web Dashboard (Zero Node.js Dependencies)
+```bash
+# Serve locally via Python
+py -m http.server 3000 --directory web
+# Opens live at http://localhost:3000/
+# Or simply double-click web/index.html directly in any browser
 ```
 
 ---
 
-## 4. Key Empirical Findings (Day 1)
+## 4. Key Empirical Findings
 
-1. **Travel Time Degradation:**
-   * Under peak congestion (Pessimistic), total travel duration increases by **+158.5%** over free-flow (Optimistic).
-2. **Vehicle Shift Limit Saturation:**
-   * With a 360-minute maximum vehicle shift, the system requires **4 vehicles** under normal traffic, but must deploy **6 vehicles** under heavy traffic to prevent shift overtime.
-3. **Plan Brittleness (Stress Test):**
-   * If a route plan generated under Most-Likely traffic is deployed during heavy traffic, on-time delivery rate plummets from **96.2% to 65.4%**, and late deliveries surge from **3 to 27**.
+### 4.1 27-Instance Academic Benchmark (9 Days × 3 Traffic Regimes)
+* **On-Time Advantage:** Cluster-first Decomposed MILP achieves **97.58% Average On-Time Rate** vs. **94.07%** for Greedy (+3.51% punctuality advantage).
+* **Lateness Reduction:** Reduces total delayed hospital deliveries by **58.9%** (48 late deliveries vs. 117 for Greedy across all 1,938 clinic orders).
+* **Computational Efficiency:** Solves full 63–84 customer instances in **46.17 seconds** average total runtime.
+
+### 4.2 Multi-Objective Trade-Off (RQ4)
+* The weighted objective $Z = \alpha D + \beta T + \gamma L$ ($\alpha+\beta+\gamma=1$) reveals a sharp trade-off:
+  * **Profile 7 ($\alpha=0.20, \beta=0.20, \gamma=0.60$):** Best observed non-dominated trade-off, achieving **100% on-time delivery (0 lateness)** at **86.0 km**.
+  * **Profile 8 ($\gamma=1.00$):** Optimizing purely for lateness without mileage penalties inflates route distance by **+159% (222.8 km)**.
+
+### 4.3 Traffic Robustness Under Severe Gridlock (RQ6)
+* When route plans optimized under normal traffic are deployed under severe gridlock (+50% travel times):
+  * **Greedy Punctuality:** Collapses by **-20.3%** down to **72.71%**.
+  * **Decomposed MILP:** Maintains an **80.02% resilience buffer (+7.31% higher)**, avoiding **5,171 minutes** of fleet delay and preventing **49 delayed hospital deliveries**.
+
+### 4.4 Monolithic MILP Scalability Limits (RQ3)
+* Monolithic CVRPTW-S MILP solves instances up to $n=20$ within 30s (with 25–50% optimality gaps).
+* At $n \ge 25$ and the full 78-node Day 1 problem, monolithic MILP fails to find an integer feasible solution within 120s, empirically establishing the necessity for **cluster-first decomposition**.
 
 ---
 

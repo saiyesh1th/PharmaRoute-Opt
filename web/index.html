@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PharmaRoute-Opt | Operations Research Decision Support</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="index.css">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand-block">
+                <div class="brand-icon">💊</div>
+                <div class="brand-text">
+                    <h2>PharmaRoute</h2>
+                    <span>OPT-DSS v2.0</span>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <label class="sidebar-label">Delivery Instance</label>
+                <div class="select-wrapper">
+                    <select id="daySelect" class="custom-select">
+                        <option value="1">Day 1 (78 Pharmacies)</option>
+                        <option value="2">Day 2 (63 Pharmacies)</option>
+                        <option value="3">Day 3 (67 Pharmacies)</option>
+                        <option value="4">Day 4 (69 Pharmacies)</option>
+                        <option value="5">Day 5 (75 Pharmacies)</option>
+                        <option value="6">Day 6 (77 Pharmacies)</option>
+                        <option value="7">Day 7 (66 Pharmacies)</option>
+                        <option value="8">Day 8 (74 Pharmacies)</option>
+                        <option value="9">Day 9 (84 Pharmacies)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <label class="sidebar-label">Traffic Regime</label>
+                <div class="segmented-control" id="trafficControl">
+                    <button class="seg-btn" data-scenario="optimistic">🟢 Free</button>
+                    <button class="seg-btn active" data-scenario="mostlikely">🟡 Normal</button>
+                    <button class="seg-btn" data-scenario="pessimistic">🔴 Gridlock</button>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <label class="sidebar-label">Optimization Engine</label>
+                <div class="engine-cards">
+                    <div class="engine-card active" data-engine="decomposed">
+                        <div class="engine-header">
+                            <span class="engine-title">⚡ Decomposed MILP</span>
+                            <span class="engine-tag tag-opt">Hybrid OR</span>
+                        </div>
+                        <p class="engine-desc">Cluster-First Exact Subproblems (HiGHS). Enforces 98%+ punctuality.</p>
+                    </div>
+                    <div class="engine-card" data-engine="greedy">
+                        <div class="engine-header">
+                            <span class="engine-title">🏃 Greedy Baseline</span>
+                            <span class="engine-tag tag-base">Heuristic</span>
+                        </div>
+                        <p class="engine-desc">Sequential packing. Lower mileage, but high delay risk under traffic.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="fleet-specs-card">
+                <div class="fleet-specs-title">🚐 Fleet Constraints</div>
+                <div class="spec-row"><span>Payload Weight</span><b>600 kg / van</b></div>
+                <div class="spec-row"><span>Cargo Volume</span><b>3.00 m³ / van</b></div>
+                <div class="spec-row"><span>Shift Duration</span><b>360 min (6 hrs)</b></div>
+                <div class="spec-row"><span>Depot Hub</span><b>Node 0 (Central)</b></div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="dataset-credit">Athens Last-Mile Delivery Dataset<br><span>Zenodo 10.5281/zenodo.15310106</span></div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace -->
+        <main class="main-content">
+            <!-- Top Hero Banner -->
+            <header class="app-header">
+                <div class="header-left">
+                    <div class="header-title-row">
+                        <h1 class="page-title">Pharmaceutical Logistics Decision Support</h1>
+                        <span class="status-pill status-ready">● Precomputed Real-Time Engine</span>
+                    </div>
+                    <p class="header-desc">
+                        Multi-criteria CVRPTW-S optimization balancing operational mileage, transit duration, and healthcare deadline SLA compliance under traffic congestion shocks.
+                    </p>
+                </div>
+                <div class="header-right">
+                    <button id="guideModalBtn" class="btn-ghost">📖 How It Works</button>
+                    <a href="https://github.com/saiyesh1th/PharmaRoute-Opt" target="_blank" class="btn-primary">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                        Repository
+                    </a>
+                </div>
+            </header>
+
+            <!-- Navigation Tabs -->
+            <nav class="tab-nav">
+                <button class="nav-tab active" data-tab="tab-operations">
+                    <span class="tab-icon">🗺️</span> Spatial Fleet Operations
+                </button>
+                <button class="nav-tab" data-tab="tab-benchmarks">
+                    <span class="tab-icon">📊</span> 9-Day Benchmark (RQ5)
+                </button>
+                <button class="nav-tab" data-tab="tab-multiobj">
+                    <span class="tab-icon">⚖️</span> Multi-Objective Trade-Offs (RQ4)
+                </button>
+                <button class="nav-tab" data-tab="tab-robustness">
+                    <span class="tab-icon">🛡️</span> Traffic Stress Simulation (RQ6)
+                </button>
+                <button class="nav-tab" data-tab="tab-scalability">
+                    <span class="tab-icon">🔬</span> Algorithmic Scalability (RQ2/3)
+                </button>
+            </nav>
+
+            <!-- TAB 1: OPERATIONS & SPATIAL MAP -->
+            <section id="tab-operations" class="tab-panel active">
+                <!-- 5 Key Performance Indicators -->
+                <div class="kpi-row">
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Total Distance</span>
+                            <span class="kpi-icon">📏</span>
+                        </div>
+                        <div class="kpi-body">
+                            <span id="kpiDist" class="kpi-val">0.0</span>
+                            <span class="kpi-unit">km</span>
+                        </div>
+                        <div id="kpiDistDelta" class="kpi-badge neutral">--</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Fleet Travel Time</span>
+                            <span class="kpi-icon">⏱️</span>
+                        </div>
+                        <div class="kpi-body">
+                            <span id="kpiTime" class="kpi-val">0</span>
+                            <span class="kpi-unit">min</span>
+                        </div>
+                        <div id="kpiTimeSub" class="kpi-subtext">-- hrs total</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">On-Time SLA Delivery</span>
+                            <span class="kpi-icon">🎯</span>
+                        </div>
+                        <div class="kpi-body">
+                            <span id="kpiOtr" class="kpi-val">100.0</span>
+                            <span class="kpi-unit">%</span>
+                        </div>
+                        <div id="kpiOtrDelta" class="kpi-badge positive">--</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Late Deliveries</span>
+                            <span class="kpi-icon">⚠️</span>
+                        </div>
+                        <div class="kpi-body">
+                            <span id="kpiLate" class="kpi-val">0</span>
+                            <span class="kpi-unit">stops</span>
+                        </div>
+                        <div id="kpiLateDelta" class="kpi-badge neutral">0 delayed stops</div>
+                    </div>
+
+                    <div class="kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-label">Vehicles Deployed</span>
+                            <span class="kpi-icon">🚐</span>
+                        </div>
+                        <div class="kpi-body">
+                            <span id="kpiVeh" class="kpi-val">0</span>
+                            <span class="kpi-unit">vans</span>
+                        </div>
+                        <div id="kpiVehSub" class="kpi-subtext">-- stops / van</div>
+                    </div>
+                </div>
+
+                <!-- 2-Column Operational Grid -->
+                <div class="ops-grid">
+                    <!-- Left: Spatial Topological Network Map -->
+                    <div class="panel-card map-panel">
+                        <div class="panel-header">
+                            <div class="panel-title-group">
+                                <h3>2D Spatial Network Topology (MDS Projection)</h3>
+                                <p>Reconstructed from empirical road distance matrices via classical Multidimensional Scaling.</p>
+                            </div>
+                            <div class="map-controls">
+                                <select id="vehicleFilter" class="custom-select-sm">
+                                    <option value="all">Show All Vehicles</option>
+                                </select>
+                                <button id="playSimBtn" class="btn-sm btn-outline">▶ Play Route Simulation</button>
+                            </div>
+                        </div>
+
+                        <div class="canvas-container">
+                            <canvas id="routeCanvas" width="800" height="480"></canvas>
+                            <div id="mapTooltip" class="canvas-tooltip hidden"></div>
+                        </div>
+
+                        <div class="map-legend">
+                            <div class="legend-item"><span class="legend-dot depot-dot"></span> Central Pharmacy Depot</div>
+                            <div class="legend-item"><span class="legend-dot ontime-dot"></span> On-Time Delivery Stop</div>
+                            <div class="legend-item"><span class="legend-dot late-dot"></span> Delayed Delivery Stop</div>
+                            <div class="legend-item"><span class="legend-line"></span> Active Vehicle Loop</div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Vehicle Inspector & Gauges -->
+                    <div class="panel-card inspector-panel">
+                        <div class="panel-header">
+                            <div class="panel-title-group">
+                                <h3>Vehicle Tour Inspector</h3>
+                                <p>Capacity utilization and shift health.</p>
+                            </div>
+                        </div>
+
+                        <div class="vehicle-select-block">
+                            <label class="input-label">Select Active Van</label>
+                            <select id="vanSelect" class="custom-select">
+                                <option value="0">Van 1</option>
+                            </select>
+                        </div>
+
+                        <div class="gauge-group">
+                            <div class="gauge-item">
+                                <div class="gauge-label">
+                                    <span>⚖️ Payload Weight</span>
+                                    <b id="gaugeWeightVal">0.0 / 600 kg</b>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div id="gaugeWeightBar" class="progress-bar-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="gauge-item">
+                                <div class="gauge-label">
+                                    <span>📦 Cargo Volume</span>
+                                    <b id="gaugeVolumeVal">0.00 / 3.00 m³</b>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div id="gaugeVolumeBar" class="progress-bar-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+
+                            <div class="gauge-item">
+                                <div class="gauge-label">
+                                    <span>⏱️ Shift Duration</span>
+                                    <b id="gaugeShiftVal">0.0 / 360 min</b>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div id="gaugeShiftBar" class="progress-bar-fill" style="width: 0%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sequence-section">
+                            <label class="input-label">Tour Stop Sequence Flow</label>
+                            <div id="stopSequenceFlow" class="sequence-pill-container">
+                                <!-- Rendered dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stop-by-Stop Delivery Schedule Table -->
+                <div class="panel-card table-panel">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <h3>Stop-by-Stop Delivery Schedule & Deadline SLA Status</h3>
+                            <p>Detailed arrival, departure, time windows, and lateness verification for selected vehicle tour.</p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="data-table" id="scheduleTable">
+                            <thead>
+                                <tr>
+                                    <th>Seq</th>
+                                    <th>Pharmacy / Clinic Stop</th>
+                                    <th>Arrival (min)</th>
+                                    <th>Time Window [EAT - LAT]</th>
+                                    <th>Departure (min)</th>
+                                    <th>SLA Compliance</th>
+                                    <th>Demand Weight</th>
+                                    <th>Demand Volume</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: 9-DAY BENCHMARK -->
+            <section id="tab-benchmarks" class="tab-panel">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <h3>9-Day Multi-Scenario Benchmark (27 Instances Evaluated)</h3>
+                            <p>Direct comparison between Greedy Sequential Baseline and Cluster-First Decomposed MILP (HiGHS).</p>
+                        </div>
+                        <div class="panel-actions">
+                            <button id="downloadBenchmarkCsv" class="btn-sm btn-outline">📥 Export Benchmark CSV</button>
+                        </div>
+                    </div>
+
+                    <div class="summary-stat-grid">
+                        <div class="stat-box">
+                            <div class="stat-number">27 / 27</div>
+                            <div class="stat-label">Instances Solved</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number stat-pos">+3.51%</div>
+                            <div class="stat-label">Average Punctuality Advantage</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number stat-pos">69 Stops</div>
+                            <div class="stat-label">Critical Late Deliveries Saved</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-number">46.2s</div>
+                            <div class="stat-label">Avg Decomposed Solve Time</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-grid">
+                        <div class="chart-container">
+                            <h4>Punctuality SLA Compliance (% On-Time) across All 9 Days</h4>
+                            <canvas id="chartBenchmarkOtr" height="280"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Decomposed MILP Distance vs Late Deliveries by Scenario</h4>
+                            <canvas id="chartBenchmarkScatter" height="280"></canvas>
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 24px 0 12px 0;">Complete 27-Instance Benchmark Table</h4>
+                    <div class="table-responsive">
+                        <table class="data-table" id="benchmarkTable">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Scenario</th>
+                                    <th>Orders</th>
+                                    <th>Greedy Dist</th>
+                                    <th>Decomp Dist</th>
+                                    <th>Greedy Late</th>
+                                    <th>Decomp Late</th>
+                                    <th>Greedy OTR</th>
+                                    <th>Decomp OTR</th>
+                                    <th>OTR Advantage</th>
+                                    <th>Solve Time</th>
+                                </tr>
+                            </thead>
+                            <tbody id="benchmarkTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: MULTI-OBJECTIVE WEIGHT SWEEP -->
+            <section id="tab-multiobj" class="tab-panel">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <h3>Multi-Objective Weighted-Sum Scalarization Sweep (RQ4)</h3>
+                            <p>Mapping the Pareto trade-off between Fleet Distance, Transit Time, and Customer Lateness.</p>
+                        </div>
+                    </div>
+
+                    <div class="spotlight-banner">
+                        <div class="spotlight-title">🌟 Best Observed Non-Dominated Trade-Off: Profile 7 (Service Quality Emphasis)</div>
+                        <p class="spotlight-desc">
+                            <b>Scalarization Weights:</b> α (Distance) = 0.20, β (Time) = 0.20, γ (Lateness Penalty) = 0.60<br>
+                            <b>Empirical Result:</b> Achieved <b>100.0% On-Time Delivery</b> (0.0 min lateness) at a compact distance of <b>86.0 km</b>. 
+                            Prioritizing lateness without routing penalties (γ=1.0) leads to an unnecessary <b>+159% distance explosion (222.8 km)</b>. Profile 7 captures the optimal balance.
+                        </p>
+                    </div>
+
+                    <div class="chart-grid">
+                        <div class="chart-container full-width">
+                            <h4>Pareto Frontier: Total Fleet Distance vs Customer Lateness Duration</h4>
+                            <canvas id="chartPareto" height="280"></canvas>
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 24px 0 12px 0;">Evaluated Multi-Objective Weight Profiles</h4>
+                    <div class="table-responsive">
+                        <table class="data-table" id="multiObjTable">
+                            <thead>
+                                <tr>
+                                    <th>Profile Name</th>
+                                    <th>α (Dist)</th>
+                                    <th>β (Time)</th>
+                                    <th>γ (Late)</th>
+                                    <th>Total Dist</th>
+                                    <th>Travel Time</th>
+                                    <th>Late Stops</th>
+                                    <th>Lateness (min)</th>
+                                    <th>On-Time %</th>
+                                    <th>MIP Gap</th>
+                                </tr>
+                            </thead>
+                            <tbody id="multiObjTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: TRAFFIC ROBUSTNESS -->
+            <section id="tab-robustness" class="tab-panel">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <h3>Traffic Robustness Stress Test (RQ6)</h3>
+                            <p>Most-Likely planned routes subjected to severe Pessimistic traffic gridlock without re-routing.</p>
+                        </div>
+                    </div>
+
+                    <div class="robust-kpi-grid">
+                        <div class="robust-kpi-card danger">
+                            <div class="kpi-label">Greedy Stressed On-Time Rate</div>
+                            <div class="kpi-val">72.7%</div>
+                            <div class="kpi-subtext">-20.3% collapse under traffic shock</div>
+                        </div>
+                        <div class="robust-kpi-card success">
+                            <div class="kpi-label">Decomposed Stressed On-Time Rate</div>
+                            <div class="kpi-val">80.0%</div>
+                            <div class="kpi-subtext">+7.31% higher resilience buffer</div>
+                        </div>
+                        <div class="robust-kpi-card highlight">
+                            <div class="kpi-label">Cumulative Delay Avoided</div>
+                            <div class="kpi-val">5,171 min</div>
+                            <div class="kpi-subtext">49 hospital shipments saved from delay</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-grid">
+                        <div class="chart-container">
+                            <h4>Punctuality SLA Resilience under Traffic Shock across 9 Days</h4>
+                            <canvas id="chartRobustOtr" height="280"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h4>Delay Amplification under Severe Traffic Congestion (Minutes)</h4>
+                            <canvas id="chartRobustSurge" height="280"></canvas>
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 24px 0 12px 0;">9-Day Traffic Congestion Vulnerability Audit</h4>
+                    <div class="table-responsive">
+                        <table class="data-table" id="robustTable">
+                            <thead>
+                                <tr>
+                                    <th>Day</th>
+                                    <th>Orders</th>
+                                    <th>Greedy Normal OTR</th>
+                                    <th>Greedy Stressed OTR</th>
+                                    <th>Greedy Drop</th>
+                                    <th>Decomp Normal OTR</th>
+                                    <th>Decomp Stressed OTR</th>
+                                    <th>Decomp Drop</th>
+                                    <th>Delay Avoided</th>
+                                </tr>
+                            </thead>
+                            <tbody id="robustTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: SCALABILITY -->
+            <section id="tab-scalability" class="tab-panel">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title-group">
+                            <h3>Algorithmic Scalability & Combinatorial Intractability (RQ2/3)</h3>
+                            <p>Empirical evidence justifying the transition from Monolithic MILP to Cluster-First Decomposition.</p>
+                        </div>
+                    </div>
+
+                    <div class="guide-box">
+                        <b>Core Operations Research Insight:</b><br>
+                        While the monolithic MILP achieves high quality on small instances (n ≤ 20),
+                        at production scale (n ≥ 40), the formulation is <b>computationally challenging under standard time limits</b>, discovering <b>0 feasible integer tours</b> within allocated budgets (60s–120s).
+                        This computational wall provides the empirical foundation for our feasibility-aware cluster-first decomposition.
+                    </div>
+
+                    <div class="chart-grid">
+                        <div class="chart-container full-width">
+                            <h4>Monolithic HiGHS Combinatorial Explosion: Relative MIP Gap & Runtime Growth</h4>
+                            <canvas id="chartScalability" height="300"></canvas>
+                        </div>
+                    </div>
+
+                    <h4 style="margin: 24px 0 12px 0;">Scalability Benchmark Data (Day 1 Instance)</h4>
+                    <div class="table-responsive">
+                        <table class="data-table" id="scaleTable">
+                            <thead>
+                                <tr>
+                                    <th>Customer Stops (n)</th>
+                                    <th>Method</th>
+                                    <th>Solver Status</th>
+                                    <th>Primal Bound (km)</th>
+                                    <th>Dual Bound (km)</th>
+                                    <th>MIP Gap (%)</th>
+                                    <th>Runtime (s)</th>
+                                    <th>Total Distance</th>
+                                    <th>Late Stops</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scaleTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- How It Works Modal -->
+    <div id="guideModal" class="modal-overlay hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>📖 How PharmaRoute-Opt Works</h3>
+                <button id="closeModalBtn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <h4>1. The Clinical Problem</h4>
+                <p>Pharmaceutical supply chains differ from typical e-commerce delivery: hospital orders have rigid delivery deadlines, vehicles carry cold-chain dual-knapsack weight (600 kg) and volume (3.0 m³) capacity limits, and traffic congestion can spoil temperature-sensitive medications.</p>
+                
+                <h4>2. The Operations Research Architecture</h4>
+                <p>We formulate the problem as a <b>CVRPTW-S</b> (Capacitated Vehicle Routing with Time Windows and Service Times). Due to the combinatorial explosion of monolithic solvers at n ≥ 40 stops, we introduce <b>Feasibility-Aware Cluster Decomposition</b>, which partitions the distance matrix into capacity-compliant sectors and solves each using exact HiGHS branch-and-cut optimization.</p>
+                
+                <h4>3. Multi-Scenario Traffic Validation</h4>
+                <p>Every route is evaluated across 3 real-world traffic regimes from the Athens delivery dataset (Optimistic, Most-Likely, Pessimistic) to stress-test real-world resilience.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Precomputed Data and App Logic -->
+    <script src="data/pharma_data.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>
