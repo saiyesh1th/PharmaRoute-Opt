@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from src.data.loader import DataLoader
 from src.data.schema import VehicleConfig
 from src.baseline.nearest_neighbor import NearestNeighborCVRPTW
+from src.optimization.decomposition import FeasibilityAwareDecomposition
 from src.optimization.model import CVRPTWModelBuilder
 from src.optimization.solver import CVRPTWSolver
 from src.scenarios.traffic import TrafficScenarioManager
@@ -18,11 +19,13 @@ def main():
     parser = argparse.ArgumentParser(description="PharmaRoute-Opt Experiment Runner")
     parser.add_argument("--day", type=int, default=1, help="Operational day instance (1-9)")
     parser.add_argument("--scenario", type=str, default="mostlikely", choices=["optimistic", "mostlikely", "pessimistic"], help="Traffic scenario")
-    parser.add_argument("--mode", type=str, default="baseline", choices=["baseline", "milp", "scenarios"], help="Execution mode")
+    parser.add_argument("--mode", type=str, default="baseline", choices=["baseline", "milp", "scenarios", "decomposition"], help="Execution mode")
     parser.add_argument("--nodes", type=int, default=10, help="Number of customer nodes for MILP benchmark (default: 10)")
     parser.add_argument("--time-limit", type=int, default=30, help="Solver time limit in seconds")
     parser.add_argument("--capacity-weight", type=float, default=600.0, help="Vehicle payload capacity in kg")
     parser.add_argument("--capacity-volume", type=float, default=3.0, help="Vehicle volume capacity in m³")
+    parser.add_argument("--shift-duration", type=float, default=360.0, help="Max driver shift length in minutes")
+    parser.add_argument("--fleet-size", type=int, default=None, help="Maximum number of available vehicles (optional)")
     args = parser.parse_args()
 
     print(f"\n========================================================")
@@ -32,7 +35,12 @@ def main():
 
     loader = DataLoader()
     instance = loader.load_day(args.day)
-    config = VehicleConfig(capacity_weight_kg=args.capacity_weight, capacity_volume_m3=args.capacity_volume)
+    config = VehicleConfig(
+        capacity_weight_kg=args.capacity_weight,
+        capacity_volume_m3=args.capacity_volume,
+        max_route_duration_min=args.shift_duration,
+        fleet_size=args.fleet_size
+    )
 
     if args.mode == "baseline":
         solver = NearestNeighborCVRPTW(config)
@@ -92,6 +100,24 @@ def main():
         print(f"  • Travel Time in Congestion: {stress.total_travel_time_min} min")
         print(f"  • Resulting Late Deliveries: {stress.late_deliveries}")
         print(f"  • Resulting On-Time Rate: {stress.on_time_rate_pct}%")
+
+    elif args.mode == "decomposition":
+        decomposer = FeasibilityAwareDecomposition(vehicle_config=config, time_limit_per_cluster=args.time_limit)
+        sol = decomposer.solve(instance, scenario=args.scenario)
+        metrics = {
+            "Total Distance (km)": sol.total_distance_km,
+            "Total Travel Time (min)": sol.total_travel_time_min,
+            "Vehicles Used": sol.vehicles_used,
+            "Clusters": sol.num_clusters,
+            "On-Time Rate (%)": f"{sol.on_time_rate_pct}%",
+            "Late Deliveries": sol.late_deliveries,
+            "Total Lateness (min)": sol.total_lateness_min,
+            "Weight Utilization (%)": f"{sol.weight_utilization_pct}%",
+            "Volume Utilization (%)": f"{sol.volume_utilization_pct}%",
+            "Runtime (sec)": sol.total_runtime_sec,
+        }
+        report = RouteVisualizer.print_solution_summary(f"Day {args.day} - {args.scenario} (Decomposed MILP)", sol.routes, metrics)
+        print(report)
 
 
 if __name__ == "__main__":
