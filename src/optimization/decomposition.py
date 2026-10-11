@@ -198,8 +198,8 @@ class FeasibilityAwareDecomposition:
         for c in clusters:
             # Capacity-required vehicles + flexibility buffer (up to 2) to ensure shift feasibility
             k_cluster = int(np.ceil(max(c.total_weight_kg / self.config.capacity_weight_kg, c.total_volume_m3 / self.config.capacity_volume_m3)))
-            k_cluster = max(k_cluster, 1)
-            fleet_available = min(len(c.customer_nodes), max(k_cluster, 2))
+            # If fleet_size constraint is active, tightly allocate vehicles based on capacity
+            fleet_available = min(len(c.customer_nodes), max(k_cluster, 1 if self.config.fleet_size is not None else 2))
             cluster_veh_cfg = VehicleConfig(
                 capacity_weight_kg=self.config.capacity_weight_kg,
                 capacity_volume_m3=self.config.capacity_volume_m3,

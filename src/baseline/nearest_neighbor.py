@@ -61,6 +61,9 @@ class NearestNeighborCVRPTW:
         total_cap_vol = 0.0
 
         while unvisited:
+            if self.config.fleet_size is not None and vehicle_idx > self.config.fleet_size:
+                break
+
             route = VehicleRoute(vehicle_id=vehicle_idx)
             route.stops.append(0)
             route.arrival_times.append(0.0)
