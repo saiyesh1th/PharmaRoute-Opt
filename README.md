@@ -88,35 +88,42 @@ PharmaRoute-Opt/
 
 ### 3.1 Installation (Python Environment)
 ```bash
-py -m pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ### 3.2 Run Unit Tests
 ```bash
-py -m pytest tests/
+python -m pytest tests/
 ```
 
 ### 3.3 Run Optimization Benchmarks via CLI
 ```bash
 # Run baseline heuristic for Day 1
-py run_experiment.py --day 1 --scenario mostlikely
+python run_experiment.py --day 1 --scenario mostlikely
 
 # Run multi-scenario traffic comparison & stress test
-py run_experiment.py --day 1 --mode scenarios
+python run_experiment.py --day 1 --mode scenarios
 
 # Run full 9-day x 3-scenario benchmark (27 instances)
-py experiments/run_nine_day_benchmark.py
+python experiments/run_nine_day_benchmark.py
 
 # Run multi-objective weight sweep (RQ4)
-py experiments/run_multiobjective_sweep.py
+python experiments/run_multiobjective_sweep.py
 
 # Run severe traffic stress test (RQ6)
-py experiments/run_robustness_stress_test.py
+python experiments/run_robustness_stress_test.py
 ```
 
 ### 3.4 Launch Decision Support Web Interfaces
 
-#### Option A: Production React + Leaflet GIS Dashboard (Recommended)
+#### Option A: Interactive Streamlit Dashboard (Highly Recommended)
+The repository includes a fully-featured, data-rich Streamlit application for visualizing route KPIs, multi-objective trade-offs, and stress tests.
+```bash
+python -m streamlit run app/app.py
+# Opens live at http://localhost:8501/
+```
+
+#### Option B: Production React + Leaflet GIS Dashboard
 ```bash
 cd frontend
 npm install
@@ -124,10 +131,10 @@ npm run dev
 # Opens live at http://localhost:5173/
 ```
 
-#### Option B: Standalone Web Dashboard (Zero Node.js Dependencies)
+#### Option C: Standalone Web Dashboard (Zero Node.js Dependencies)
 ```bash
 # Serve locally via Python
-py -m http.server 3000 --directory web
+python -m http.server 3000 --directory web
 # Opens live at http://localhost:3000/
 # Or simply double-click web/index.html directly in any browser
 ```
