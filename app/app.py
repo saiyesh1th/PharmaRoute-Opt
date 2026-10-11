@@ -1,6 +1,13 @@
-import json
+import sys
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+
+# Add project root to sys.path so 'src' modules can be imported in Streamlit
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+import json
 
 import numpy as np
 import pandas as pd
@@ -241,6 +248,53 @@ def get_instance_orders(day: int):
     from src.data.loader import DataLoader
     return DataLoader().load_day(day)
 
+@st.cache_data
+def simulate_custom_scenario(
+    day: int,
+    scenario: str,
+    engine: str,
+    capacity_weight: float,
+    capacity_volume: float,
+    max_route_duration: float,
+    fleet_size: Optional[int] = None
+):
+    from src.data.loader import DataLoader
+    from src.data.schema import VehicleConfig
+    from src.baseline.nearest_neighbor import NearestNeighborCVRPTW
+    from src.optimization.decomposition import FeasibilityAwareDecomposition
+
+    inst = DataLoader().load_day(day)
+    cfg = VehicleConfig(
+        capacity_weight_kg=capacity_weight,
+        capacity_volume_m3=capacity_volume,
+        max_route_duration_min=max_route_duration,
+        fleet_size=fleet_size
+    )
+
+    if engine == "greedy":
+        sol = NearestNeighborCVRPTW(cfg).solve(inst, scenario=scenario)
+        return {
+            "distance_km": sol.total_distance_km,
+            "travel_time_min": sol.total_travel_time_min,
+            "late_deliveries": sol.total_late_deliveries,
+            "total_lateness_min": sol.total_lateness_min,
+            "on_time_rate_pct": sol.on_time_rate_pct,
+            "vehicles": sol.vehicles_used,
+            "routes": [r.stops for r in sol.routes]
+        }
+    else:
+        decomp = FeasibilityAwareDecomposition(vehicle_config=cfg, time_limit_per_cluster=15)
+        sol = decomp.solve(inst, scenario=scenario)
+        return {
+            "distance_km": sol.total_distance_km,
+            "travel_time_min": sol.total_travel_time_min,
+            "late_deliveries": sol.late_deliveries,
+            "total_lateness_min": sol.total_lateness_min,
+            "on_time_rate_pct": sol.on_time_rate_pct,
+            "vehicles": sol.vehicles_used,
+            "routes": sol.routes
+        }
+
 
 df_benchmarks, routes_db, df_multi, df_scale, df_robust, mds_coords = load_all_datasets()
 
@@ -318,21 +372,53 @@ method_selected = st.sidebar.radio(
     options=["decomposed", "greedy"],
     format_func=lambda m: "⚡ Decomposed MILP (Hybrid OR)" if m == "decomposed" else "🏃 Greedy Baseline Heuristic",
     index=0,
-    help="Compare the mathematically optimized decomposed solution against the greedy dispatch heuristic."
+    help="Select the routing optimization model."
 )
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 🚚 Vehicle Specifications")
-st.sidebar.markdown("""
-<div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px; font-size: 0.82rem; color: #cbd5e1; line-height: 1.6;">
-    <div style="font-weight: 700; color: #f8fafc; margin-bottom: 6px;">Delivery Van Constraints</div>
-    • <b>Weight Capacity</b>: 600 kg<br>
-    • <b>Cargo Volume</b>: 3.0 m³<br>
-    • <b>Shift Duration</b>: 360 min (6 hrs)<br>
-    • <b>Depot</b>: Central Pharmacy (Node 0)<br>
-    • <b>Time Windows</b>: Soft with Lateness Penalty
-</div>
-""", unsafe_allow_html=True)
+st.sidebar.markdown("### 🚚 Vehicle & Fleet Simulation Controls")
+
+col_vol, col_wt = st.sidebar.columns(2)
+with col_vol:
+    volume_cap = st.number_input(
+        "Cargo Vol (m³)",
+        min_value=0.5,
+        max_value=10.0,
+        value=3.0,
+        step=0.25,
+        help="Vehicle cubic cargo volume capacity limit (Default: 3.0 m³)"
+    )
+with col_wt:
+    weight_cap = st.number_input(
+        "Payload (kg)",
+        min_value=100.0,
+        max_value=2500.0,
+        value=600.0,
+        step=50.0,
+        help="Vehicle maximum payload weight limit (Default: 600 kg)"
+    )
+
+shift_duration = st.sidebar.slider(
+    "Max Shift Duration (min)",
+    min_value=180,
+    max_value=600,
+    value=360,
+    step=30,
+    format="%d min",
+    help="Driver shift cutoff limit (Standard: 360 min = 6 hrs)"
+)
+
+fleet_sizing_mode = st.sidebar.selectbox(
+    "Fleet Sizing Mode",
+    options=["Auto (Minimum Feasible)", "Custom Truck Fleet Limit"],
+    index=0,
+    help="Constrain the number of available trucks to simulate fleet shortages."
+)
+
+if fleet_sizing_mode == "Custom Truck Fleet Limit":
+    fleet_limit = st.sidebar.slider("Maximum Dispatched Trucks", min_value=1, max_value=12, value=4, help="Maximum number of vans allowed.")
+else:
+    fleet_limit = None
 
 
 # ---------------------------------------------------------------------------
@@ -344,7 +430,26 @@ n_orders = instance_data.num_orders
 run_key = f"day_{day_selected}_{scenario_selected}"
 current_run_data = routes_db.get(run_key, {})
 
-if current_run_data:
+is_default_config = (
+    abs(volume_cap - 3.0) < 1e-4 and
+    abs(weight_cap - 600.0) < 1e-4 and
+    abs(shift_duration - 360.0) < 1e-4 and
+    fleet_limit is None
+)
+
+if not is_default_config:
+    with st.spinner("⚡ Simulating custom fleet scenario in real-time..."):
+        selected_metrics = simulate_custom_scenario(
+            day_selected, scenario_selected, method_selected,
+            weight_cap, volume_cap, shift_duration, fleet_limit
+        )
+        alt_engine = "greedy" if method_selected == "decomposed" else "decomposed"
+        comparison_metrics = simulate_custom_scenario(
+            day_selected, scenario_selected, alt_engine,
+            weight_cap, volume_cap, shift_duration, fleet_limit
+        )
+        routes = selected_metrics["routes"]
+elif current_run_data:
     selected_metrics = current_run_data[method_selected]
     comparison_metrics = current_run_data["greedy" if method_selected == "decomposed" else "decomposed"]
     routes = selected_metrics["routes"]
@@ -355,6 +460,14 @@ else:
     }
     comparison_metrics = selected_metrics
     routes = []
+
+if not is_default_config:
+    st.info(
+        f"🧪 **Interactive Scenario Simulation Active:** "
+        f"Volume Limit: **{volume_cap:.2f} m³** | Payload Limit: **{weight_cap:.0f} kg** | "
+        f"Shift: **{shift_duration:.0f} min** | Fleet Limit: **{f'{fleet_limit} vans' if fleet_limit else 'Auto-scaled'}**",
+        icon="⚡"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -386,7 +499,7 @@ with tab1:
     delta_otr = otr_val - comparison_metrics["on_time_rate_pct"]
     delta_late = late_val - comparison_metrics["late_deliveries"]
 
-    alt_name = "Greedy" if method_selected == "decomposed" else "Decomp"
+    alt_name = "Greedy" if method_selected != "greedy" else "Decomp"
 
     kpi_cards_html = f"""
     <div class="kpi-grid">
@@ -561,9 +674,9 @@ with tab1:
             r_serv = sum(instance_data.orders[s].service_time_min for s in v_stops)
             r_dur = r_trav + r_serv
 
-            w_pct = tot_w / 600.0 * 100.0
-            v_pct = tot_v / 3.0 * 100.0
-            dur_pct = r_dur / 360.0 * 100.0
+            w_pct = (tot_w / weight_cap * 100.0) if weight_cap > 0 else 0.0
+            v_pct = (tot_v / volume_cap * 100.0) if volume_cap > 0 else 0.0
+            dur_pct = (r_dur / shift_duration * 100.0) if shift_duration > 0 else 0.0
 
             st.markdown(f"""
             <div class="glass-card" style="padding: 16px; margin-bottom: 14px;">
@@ -577,13 +690,13 @@ with tab1:
             """, unsafe_allow_html=True)
 
             # Capacity Progress Bars
-            st.caption(f"⚖️ Weight Utilization: **{tot_w:.1f} / 600.0 kg** ({w_pct:.1f}%)")
+            st.caption(f"⚖️ Weight Utilization: **{tot_w:.1f} / {weight_cap:.1f} kg** ({w_pct:.1f}%)")
             st.progress(min(w_pct / 100.0, 1.0))
 
-            st.caption(f"📦 Volume Utilization: **{tot_v:.2f} / 3.00 m³** ({v_pct:.1f}%)")
+            st.caption(f"📦 Volume Utilization: **{tot_v:.2f} / {volume_cap:.2f} m³** ({v_pct:.1f}%)")
             st.progress(min(v_pct / 100.0, 1.0))
 
-            st.caption(f"⏱️ Shift Duration: **{r_dur:.1f} / 360.0 min** ({dur_pct:.1f}%)")
+            st.caption(f"⏱️ Shift Duration: **{r_dur:.1f} / {shift_duration:.1f} min** ({dur_pct:.1f}%)")
             st.progress(min(dur_pct / 100.0, 1.0))
 
             # Stop Sequence Pill Flow
