@@ -5,3 +5,6 @@ instance_size,method,solver_status,total_distance_km,total_travel_time_min,vehic
 78,Greedy Baseline,Heuristic Complete,356.0,691.0,4,3.0,264.0,96.15,0.0032,Greedy sequential construction
 78,Monolithic MILP (HiGHS),Time limit reached,,,0,,,,123.076,No feasible solution within limit
 78,Decomposed MILP (Hybrid),6 Clusters Solved,446.7,860.0,6,0.0,0.0,100.0,100.975,"Cluster solve times: [20.078, 0.366, 20.07, 20.086, 20.064, 20.082]"
+12,Greedy Baseline,Heuristic Complete,75.7,137.0,1,0.0,0.0,100.0,0.0002,Greedy sequential construction
+12,Monolithic MILP (HiGHS),Time limit reached,75.5,142.0,1,0.0,0.0,100.0,15.026,MIP Gap: 35.89%
+12,Decomposed MILP (Hybrid),1 Clusters Solved,84.2,153.0,1,1.0,7.0,91.67,10.182,Cluster solve times: [10.123]
