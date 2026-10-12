@@ -182,7 +182,7 @@ Yashwanth P T -- CB.SC.U4AIE23164
             \item Operational challenges addressed
             \item Real-world delivery dataset
             \item Multi-day dataset structure \& sectorization
-            \item The five core research questions
+            \item The six core research questions (RQ1--RQ6)
         \end{itemize}
 
         \vspace{0.25cm}
@@ -194,7 +194,7 @@ Yashwanth P T -- CB.SC.U4AIE23164
             \item 27-instance academic benchmark
             \item Routing and resource allocation findings
             \item Multi-objective Pareto trade-offs (RQ4)
-            \item Scenario robustness under traffic
+            \item Traffic robustness \& congestion stress test (RQ6)
         \end{itemize}
     \end{column}
 
@@ -581,16 +581,23 @@ delivery plan remains feasible and reliable when traffic conditions fluctuate.
     % Right Column: Trade-offs & Uncertainty
     \begin{column}{0.485\textwidth}
 
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
             {\bfseries\color{Primary}\scriptsize 04. Multiple Objectives}\par\vspace{0.02cm}
             \footnotesize How should distance, travel time, cost and service quality be balanced?
         \end{beamercolorbox}
 
         \vspace{0.15cm}
 
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
             {\bfseries\color{Primary}\scriptsize 05. Uncertainty}\par\vspace{0.02cm}
             \footnotesize How does the optimal delivery plan change under different traffic scenarios?
+        \end{beamercolorbox}
+
+        \vspace{0.15cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
+            {\bfseries\color{Primary}\scriptsize 06. Robustness}\par\vspace{0.02cm}
+            \footnotesize How resilient are optimized delivery routes under severe peak-hour traffic shocks?
         \end{beamercolorbox}
 
     \end{column}
@@ -1114,6 +1121,40 @@ where:
 \end{frame}
 
 % ------------------------------------------------------------
+% RESULTS: TRAFFIC ROBUSTNESS & CONGESTION STRESS TEST (RQ6)
+% ------------------------------------------------------------
+
+\begin{frame}{Results: Traffic Robustness \& Stress Test (RQ6)}
+\sectiontag{Congestion Shock Testing}
+
+\vspace{-0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+    \begin{column}{0.49\textwidth}
+        \begin{center}
+            \smartimage[width=\linewidth,height=4.0cm,keepaspectratio]{robustness_otr_degradation.png}{results/figures/robustness_otr_degradation.png}{Punctuality Degradation Curve}\par
+            \tiny\textcolor{Muted}{\textbf{Punctuality Degradation:} Under gridlock (+50\% travel time), Greedy drops to 72.7\%, while Decomposed MILP retains an 80.0\% buffer (+7.3\% resilience).}
+        \end{center}
+    \end{column}
+
+    \begin{column}{0.49\textwidth}
+        \begin{center}
+            \smartimage[width=\linewidth,height=4.0cm,keepaspectratio]{robustness_lateness_surge.png}{results/figures/robustness_lateness_surge.png}{Delay Surge Resilience Curve}\par
+            \tiny\textcolor{Muted}{\textbf{Delay Surge Avoided:} Shaded area highlights \textbf{5,171 minutes of fleet delay avoided} and 49 critical hospital deliveries protected across 9 days.}
+        \end{center}
+    \end{column}
+
+\end{columns}
+
+\vspace{0.05cm}
+
+\begin{center}
+    \scriptsize\textcolor{Primary}{\textbf{Operational Resilience:}} OR routes incorporate temporal slack that prevents cascading route collapse during peak-hour metropolitan Athens gridlock.
+\end{center}
+\end{frame}
+
+% ------------------------------------------------------------
 % 14. IMPLEMENTED SYSTEM WORKFLOW
 % ------------------------------------------------------------
 
@@ -1387,7 +1428,7 @@ From a real-world delivery problem to an OR-based decision-support system.
     \item \textbf{Addressed All Operational Challenges:} Handled vehicle routing, dual knapsack capacities, clinic time windows, and traffic uncertainty across real delivery instances.
     \item \textbf{Implemented OR Methodology:} Successfully combined Vehicle Routing, Assignment Optimisation, Integer Programming, and Goal Programming.
     \item \textbf{Adopted Decomposed MILP (DMILP):} Overcame the combinatorial explosion of monolithic solvers, achieving provably high-quality plans ($<3.8\%$ of optimal) in under $10\text{ seconds}$.
-    \item \textbf{Answered All 5 Research Questions:} Demonstrated generalized findings for distance reduction, capacity utilization, multi-objective balancing, and scenario robustness.
+    \item \textbf{Answered All Six Research Questions (RQ1--RQ6):} Demonstrated findings for distance reduction, capacity utilization, multi-objective balancing, and congestion shock resilience.
     \item \textbf{Delivered Interactive DSS:} Deployed a complete tool with interactive sliders, live guardrails, Leaflet GIS mapping, and transparent cost/carbon accounting.
 \end{itemize}
 
