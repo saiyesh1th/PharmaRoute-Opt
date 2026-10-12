@@ -5,7 +5,8 @@ import pharmaData from './data/pharmaData.json';
 import { 
   Truck, Clock, CheckCircle2, AlertTriangle, Route, ShieldAlert, 
   Play, Square, ExternalLink, Activity, Search, Compass, Calendar,
-  ChevronRight, MapPin, Layers, Crosshair, BarChart3, Thermometer
+  ChevronRight, MapPin, Layers, Crosshair, BarChart3, Thermometer,
+  Scale, X
 } from 'lucide-react';
 import './App.css';
 
@@ -48,6 +49,7 @@ export default function App() {
   // Secondary Tab Filters
   const [benchmarkFilter, setBenchmarkFilter] = useState('all');
   const [selectedProfileIdx, setSelectedProfileIdx] = useState(6); // Profile 7 default
+  const [showConstraintsModal, setShowConstraintsModal] = useState(false);
 
   // Refs for Leaflet Map
   const mapContainerRef = useRef(null);
@@ -509,6 +511,14 @@ export default function App() {
           </nav>
 
           <div className="navbar-right">
+            <button 
+              className="constraints-pill-btn"
+              onClick={() => setShowConstraintsModal(true)}
+              title="Inspect Applied Mathematical & Operational Constraints"
+            >
+              <Scale size={13} color="#38bdf8" />
+              <span>Applied Constraints</span>
+            </button>
             <div className="clock-telemetry">
               <Clock size={13} color="#38bdf8" />
               <span>Shift: 08:00 - 14:00 (360m)</span>
@@ -1191,6 +1201,196 @@ export default function App() {
         )}
 
       </main>
+
+      {/* =========================================================================
+          APPLIED MATHEMATICAL & OPERATIONAL CONSTRAINTS MODAL
+         ========================================================================= */}
+      {showConstraintsModal && (
+        <div className="modal-backdrop" onClick={() => setShowConstraintsModal(false)}>
+          <div className="modal-window" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <div className="modal-title-box">
+                <div className="modal-icon-badge">
+                  <Scale size={18} color="#38bdf8" />
+                </div>
+                <div>
+                  <h3 className="modal-title">Applied Mathematical &amp; Operational Constraints</h3>
+                  <p className="modal-subtitle">
+                    Formal CVRPTW-S formulation &amp; European cold-chain operational bounds enforced by HiGHS MILP
+                  </p>
+                </div>
+              </div>
+              <button 
+                className="modal-close-btn" 
+                onClick={() => setShowConstraintsModal(false)}
+                title="Close modal"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Quick KPI Constraint Badges */}
+            <div className="modal-badges-strip">
+              <div className="modal-badge-item">
+                <span className="badge-k">Payload Mass:</span>
+                <span className="badge-v">≤ 600 kg</span>
+              </div>
+              <div className="modal-badge-item">
+                <span className="badge-k">Cargo Volume:</span>
+                <span className="badge-v">≤ 3.00 m³</span>
+              </div>
+              <div className="modal-badge-item">
+                <span className="badge-k">Shift Duration:</span>
+                <span className="badge-v">≤ 360 min (6h)</span>
+              </div>
+              <div className="modal-badge-item">
+                <span className="badge-k">Depot Node:</span>
+                <span className="badge-v">Node 0 (Hub)</span>
+              </div>
+              <div className="modal-badge-item">
+                <span className="badge-k">Time Windows:</span>
+                <span className="badge-v">[EAT, LAT]</span>
+              </div>
+              <div className="modal-badge-item">
+                <span className="badge-k">Penalty γ:</span>
+                <span className="badge-v">0.60 Lateness</span>
+              </div>
+            </div>
+
+            <div className="modal-body-scrollable">
+              <div className="constraint-cards-grid">
+                
+                {/* 1. Dual Knapsack */}
+                <div className="constraint-card">
+                  <div className="constraint-card-header">
+                    <span className="constraint-tag tag-capacity">VEHICLE CAPACITY</span>
+                    <span className="constraint-num">Eq. (3) &amp; (4)</span>
+                  </div>
+                  <h4 className="constraint-name">Dual-Knapsack Payload Mass &amp; Cargo Volume</h4>
+                  <div className="constraint-formula">
+                    <code>∑ [i ∈ C] q_i · y_ik ≤ 600 kg   &amp;   ∑ [i ∈ C] v_i · y_ik ≤ 3.00 m³  (∀ k ∈ K)</code>
+                  </div>
+                  <p className="constraint-desc">
+                    Last-mile electric vehicles (Mercedes eVito / Master Z.E.) are simultaneously constrained by gross chassis payload mass (600 kg) and insulated refrigeration compartment volume (3.0 m³). Neither dimension may be violated.
+                  </p>
+                  <div className="constraint-meta-row">
+                    <span><strong>Visualized in UI:</strong> Right-Hand Telemetry Card (Mass &amp; Volume Bars) + KPI Card #4</span>
+                    <span><strong>Code Reference:</strong> <code>src/optimization/model.py:88-95</code></span>
+                  </div>
+                </div>
+
+                {/* 2. Shift Duration */}
+                <div className="constraint-card">
+                  <div className="constraint-card-header">
+                    <span className="constraint-tag tag-labor">LABOR &amp; OPERATIONAL DOCK</span>
+                    <span className="constraint-num">Eq. (5)</span>
+                  </div>
+                  <h4 className="constraint-name">Driver Shift Duration Cutoff (6-Hour Shift)</h4>
+                  <div className="constraint-formula">
+                    <code>t_return,k ≤ T_max = 360 min (08:00 AM – 14:00 PM)  (∀ k ∈ K)</code>
+                  </div>
+                  <p className="constraint-desc">
+                    Complies with European Commercial Driving Regulations and warehouse loading dock operating windows. Every dispatched van must depart, service all clinics, and return to the Athens Central Hub within 360 minutes.
+                  </p>
+                  <div className="constraint-meta-row">
+                    <span><strong>Visualized in UI:</strong> Shift Schedule (Gantt Tab) + Shift Utilization Telemetry Bar + Top Clock</span>
+                    <span><strong>Code Reference:</strong> <code>src/optimization/model.py:122-128</code></span>
+                  </div>
+                </div>
+
+                {/* 3. Customer Delivery Time Windows */}
+                <div className="constraint-card">
+                  <div className="constraint-card-header">
+                    <span className="constraint-tag tag-sla">HEALTHCARE SLA &amp; COLD-CHAIN</span>
+                    <span className="constraint-num">Eq. (8) &amp; (9)</span>
+                  </div>
+                  <h4 className="constraint-name">Customer Delivery Time Windows &amp; Service Times</h4>
+                  <div className="constraint-formula">
+                    <code>e_i ≤ t_ik ≤ l_i + L_i   (where L_i ≥ 0 penalized by γ · ∑ L_i in objective)</code>
+                  </div>
+                  <p className="constraint-desc">
+                    Each clinic i has an Earliest Arrival Time (e_i) and Latest Arrival Time (l_i). Arriving prior to e_i incurs waiting time. Deliveries after l_i risk temperature excursions and medicine spoilage, heavily penalized with weight γ = 0.60.
+                  </p>
+                  <div className="constraint-meta-row">
+                    <span><strong>Visualized in UI:</strong> Manifest Table ([EAT-LAT] min) + Map Marker Popups + Turn-by-Turn ETAs</span>
+                    <span><strong>Code Reference:</strong> <code>src/optimization/model.py:105-120</code></span>
+                  </div>
+                </div>
+
+                {/* 4. MTZ Subtour Elimination */}
+                <div className="constraint-card">
+                  <div className="constraint-card-header">
+                    <span className="constraint-tag tag-topology">TOPOLOGY &amp; PROGRESSION</span>
+                    <span className="constraint-num">Eq. (6) &amp; (7)</span>
+                  </div>
+                  <h4 className="constraint-name">Miller-Tucker-Zemlin (MTZ) Subtour Elimination</h4>
+                  <div className="constraint-formula">
+                    <code>t_jk ≥ t_ik + s_i + τ_ij - M · (1 - x_ijk)  (∀ (i,j) ∈ A, k ∈ K)</code>
+                  </div>
+                  <p className="constraint-desc">
+                    Eliminates disjoint cycles disconnected from the Athens Central Hub and enforces continuous, physically realistic time progression: arrival at j must equal arrival at i plus service time s_i plus transit travel time τ_ij.
+                  </p>
+                  <div className="constraint-meta-row">
+                    <span><strong>Visualized in UI:</strong> Sequential stops on GIS Map + Animated Van Simulation route path</span>
+                    <span><strong>Code Reference:</strong> <code>src/optimization/model.py:98-104</code></span>
+                  </div>
+                </div>
+
+                {/* 5. Single Visit / Flow Balance */}
+                <div className="constraint-card">
+                  <div className="constraint-card-header">
+                    <span className="constraint-tag tag-flow">DEGREE &amp; CONSERVATION</span>
+                    <span className="constraint-num">Eq. (1), (2), (10)</span>
+                  </div>
+                  <h4 className="constraint-name">Single Facility Visit &amp; Flow Balance</h4>
+                  <div className="constraint-formula">
+                    <code>∑ [k ∈ K] ∑ [j ∈ V] x_ijk = 1  (∀ i ∈ C)   &amp;   ∑ x_jik = ∑ x_ijk = y_ik</code>
+                  </div>
+                  <p className="constraint-desc">
+                    Guarantees full healthcare coverage: exactly one vehicle visits each scheduled clinic, avoiding duplicated deliveries. Flow conservation ensures whenever vehicle k enters node i, it must exit.
+                  </p>
+                  <div className="constraint-meta-row">
+                    <span><strong>Visualized in UI:</strong> 100% facility coverage in Delivery Manifest table with no duplicate dropoffs</span>
+                    <span><strong>Code Reference:</strong> <code>src/optimization/model.py:72-84</code></span>
+                  </div>
+                </div>
+
+                {/* 6. Cluster Decomposition */}
+                <div className="constraint-card">
+                  <div className="constraint-card-header">
+                    <span className="constraint-tag tag-architecture">ALGORITHMIC DECOMPOSITION</span>
+                    <span className="constraint-num">Decomp Phase 1</span>
+                  </div>
+                  <h4 className="constraint-name">Knapsack-Feasible Spatial Cluster Partitioning</h4>
+                  <div className="constraint-formula">
+                    <code>Partition C into S_1 ... S_m s.t. ∑ [i ∈ S_m] q_i ≤ 600 kg  &amp;  ∑ [i ∈ S_m] v_i ≤ 3.00 m³</code>
+                  </div>
+                  <p className="constraint-desc">
+                    Solves combinatorial explosion where monolithic MILP fails on n ≥ 40 stops. Max-min spatial dispersion clusters customers into capacity-bounded sectors, guaranteeing each subproblem is provably solvable by HiGHS branch-and-cut in seconds.
+                  </p>
+                  <div className="constraint-meta-row">
+                    <span><strong>Visualized in UI:</strong> 27-Instance Benchmark (RQ5 Tab) + Fleet Sector pills (North, Central, West...)</span>
+                    <span><strong>Code Reference:</strong> <code>src/optimization/decomposition.py:45-120</code></span>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div className="modal-footer">
+              <span className="modal-footer-note">
+                Full LaTeX formulation with proof and mathematical derivation available in <code>docs/mathematical_model.md</code>
+              </span>
+              <button 
+                className="btn-modal-dismiss"
+                onClick={() => setShowConstraintsModal(false)}
+              >
+                Close Specification
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

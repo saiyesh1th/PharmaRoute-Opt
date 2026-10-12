@@ -553,6 +553,16 @@
                 
                 <h4>3. Multi-Scenario Traffic Validation</h4>
                 <p>Every route is evaluated across 3 real-world traffic regimes from the Athens delivery dataset (Optimistic, Most-Likely, Pessimistic) to stress-test real-world resilience.</p>
+                
+                <h4>4. Applied Mathematical &amp; Operational Constraints</h4>
+                <ul style="padding-left: 20px; font-size: 0.86rem; color: var(--text-secondary); line-height: 1.6; margin: 0 0 16px 0;">
+                    <li><b>Dual Knapsack Capacity:</b> Payload Mass ≤ 600 kg and Cargo Volume ≤ 3.00 m³ per delivery van. Enforced in both clustering and MILP routing.</li>
+                    <li><b>Driver Shift Duration:</b> Total vehicle tour departure to return ≤ 360 min (6.0 hours, 08:00 AM – 14:00 PM) for EU labor compliance.</li>
+                    <li><b>Customer Time Windows:</b> Clinic delivery arrival within [EAT, LAT] with soft penalty γ = 0.60 on lateness.</li>
+                    <li><b>MTZ Subtour Elimination:</b> Continuous progression constraints preventing disconnected disjoint cycles.</li>
+                    <li><b>Single Facility Visit:</b> Every customer clinic visited exactly once with flow conservation at all transit nodes.</li>
+                    <li><b>Knapsack-Feasible Clustering:</b> Spatial sector partitioning guaranteeing every subproblem is solvable by HiGHS branch-and-cut in &lt;45s.</li>
+                </ul>
             </div>
         </div>
     </div>
