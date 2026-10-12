@@ -102,6 +102,13 @@
                 const panel = document.getElementById(targetId);
                 if (panel) panel.classList.add('active');
 
+                // If returning to dispatch tab, redraw canvas
+                if (targetId === 'dispatch') {
+                    setTimeout(() => {
+                        drawRouteCanvas();
+                    }, 60);
+                }
+
                 // Trigger resize for Chart.js charts
                 setTimeout(() => {
                     Object.values(chartInstances).forEach(chart => {
@@ -109,6 +116,13 @@
                     });
                 }, 50);
             });
+        });
+
+        // Window resize listener to keep canvas in sync
+        window.addEventListener('resize', () => {
+            if (document.getElementById('dispatch')?.classList.contains('active')) {
+                drawRouteCanvas();
+            }
         });
 
         // Van Selector
@@ -384,6 +398,8 @@
         const dpr = window.devicePixelRatio || 1;
 
         const rect = canvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return; // Hidden or unrendered canvas guard
+
         canvas.width = rect.width * dpr;
         canvas.height = rect.height * dpr;
         ctx.scale(dpr, dpr);
