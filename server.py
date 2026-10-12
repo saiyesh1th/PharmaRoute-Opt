@@ -71,7 +71,7 @@ class OptimizeRequest(BaseModel):
     alpha_distance: float = Field(0.20, ge=0.0, le=1.0, description="Objective weight for total travel distance")
     beta_time: float = Field(0.20, ge=0.0, le=1.0, description="Objective weight for total transit duration")
     gamma_lateness: float = Field(0.60, ge=0.0, le=1.0, description="Objective weight for SLA lateness penalty")
-    time_limit_sec: int = Field(10, ge=1, le=60, description="Solver time limit per cluster in seconds")
+    time_limit_sec: int = Field(2, ge=1, le=60, description="Solver time limit per cluster in seconds")
     fleet_size: Optional[int] = Field(None, description="Optional hard constraint on number of vehicles")
 
 
@@ -254,7 +254,7 @@ def run_optimization(req: OptimizeRequest):
         else:
             decomposer = FeasibilityAwareDecomposition(
                 vehicle_config=veh_config,
-                time_limit_per_cluster=req.time_limit_sec,
+                time_limit_per_cluster=min(req.time_limit_sec, 3),
                 alpha=req.alpha_distance,
                 beta=req.beta_time,
                 gamma=req.gamma_lateness

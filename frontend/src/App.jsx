@@ -8,7 +8,8 @@ import {
   Truck, Clock, CheckCircle2, AlertTriangle, Route, ShieldAlert, 
   Play, Square, ExternalLink, Activity, Search, Compass, Calendar,
   MapPin, Layers, BarChart3, Thermometer, Sliders, RotateCcw,
-  Sparkles, Gauge, Fuel, Eye, EyeOff, Zap
+  Sparkles, Gauge, Fuel, Eye, EyeOff, Zap, Sun, Moon,
+  ChevronDown, ChevronUp, ArrowLeft
 } from 'lucide-react';
 import './App.css';
 
@@ -63,8 +64,11 @@ export default function App() {
   const [showBackgroundRoutes, setShowBackgroundRoutes] = useState(false); // clean focused view by default
   const [mapTheme, setMapTheme] = useState('dark'); // 'dark' (Esri) or 'street' (OSM)
   const [isSimulating, setIsSimulating] = useState(false);
+  const [simSpeed, setSimSpeed] = useState(1); // 1x, 2x, 4x GPS speed
+  const [hoveredVehicle, setHoveredVehicle] = useState(null); // Hover van highlighting
   const [activeMarkerNode, setActiveMarkerNode] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [manifestExpanded, setManifestExpanded] = useState(false); // Collapsed by default for clean map workspace
 
   // Interactive Simulation Parameters State
   const [simParams, setSimParams] = useState(DEFAULT_PARAMS);
@@ -134,7 +138,7 @@ export default function App() {
           alpha_distance: customParams.alphaDistance,
           beta_time: customParams.betaTime,
           gamma_lateness: customParams.gammaLateness,
-          time_limit_sec: 10
+          time_limit_sec: 2
         })
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -179,7 +183,7 @@ export default function App() {
     if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     debounceTimerRef.current = setTimeout(() => {
       triggerPythonOptimization(simParams, day, scenario, engine);
-    }, 600);
+    }, 1000);
 
     return () => {
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
@@ -550,7 +554,7 @@ export default function App() {
       });
     }
 
-    // 2. Draw Active Routes
+    // 2. Draw Active Routes (With Hover Focus & Underglow)
     routes.forEach((route, idx) => {
       const isFocused = safeSelectedVehicle === null || safeSelectedVehicle === idx;
       if (!isFocused) return;
@@ -567,56 +571,132 @@ export default function App() {
           if (safeSelectedVehicle === idx) focusBounds.push(pt);
         });
 
-        // Vibrant active polyline
-        L.polyline(latlngs, {
-          color: vColor,
-          weight: safeSelectedVehicle === idx ? 4.5 : 3.0,
-          opacity: 0.95,
-          lineJoin: 'round',
-          lineCap: 'round'
-        }).addTo(routesLayerRef.current);
+        const isHovered = hoveredVehicle === idx;
+        const hasAnyHover = hoveredVehicle !== null && safeSelectedVehicle === null;
 
-        // Add Numbered Sequential Pins
-        let seq = 1;
-        route.forEach((node, nodeIdx) => {
-          if (node === 0) return;
-          const c = coordsMap[node];
-          const ord = dayOrders[String(node)] || {};
-          if (!c) return;
+        if (safeSelectedVehicle === idx) {
+          // Single Van Isolated View: high-contrast neon halo + shadow
+          L.polyline(latlngs, {
+            color: vColor,
+            weight: 9,
+            opacity: 0.28,
+            lineJoin: 'round',
+            lineCap: 'round'
+          }).addTo(routesLayerRef.current);
 
-          const pinNumber = seq++;
-          const customPinIcon = L.divIcon({
-            className: 'custom-pin-container',
-            html: `<div class="stop-marker-pin" style="--pin-color: ${vColor}"><span>${pinNumber}</span></div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-          });
+          L.polyline(latlngs, {
+            color: '#000000',
+            weight: 6.5,
+            opacity: 0.65,
+            lineJoin: 'round',
+            lineCap: 'round'
+          }).addTo(routesLayerRef.current);
 
-          const marker = L.marker([c.lat, c.lon], { icon: customPinIcon }).addTo(markersLayerRef.current);
+          L.polyline(latlngs, {
+            color: vColor,
+            weight: 4.8,
+            opacity: 1.0,
+            lineJoin: 'round',
+            lineCap: 'round'
+          }).addTo(routesLayerRef.current);
+        } else if (hasAnyHover) {
+          if (isHovered) {
+            // Hovered Van in All-Vans view: vivid glowing path
+            L.polyline(latlngs, {
+              color: vColor,
+              weight: 8.5,
+              opacity: 0.35,
+              lineJoin: 'round',
+              lineCap: 'round'
+            }).addTo(routesLayerRef.current);
 
-          const popupHtml = `
-            <div class="custom-popup-content">
-              <div class="custom-popup-header">
-                <span class="popup-tag">STOP #${pinNumber}</span>
-                <span class="popup-van-name" style="color: ${vColor}">VAN ${idx + 1}</span>
-              </div>
-              <div class="popup-facility-name">${c.name || `Clinic #${node}`}</div>
-              <div class="popup-med-type">📦 ${c.type || 'Vaccines & Cold-Chain'}</div>
-              <div class="popup-grid">
-                <div><span class="popup-label">Time Window</span><div class="popup-val">[${ord.eat || 0} - ${ord.lat || 0}] min</div></div>
-                <div><span class="popup-label">Scheduled ETA</span><div class="popup-val text-emerald">09:${(nodeIdx * 14 + 10).toString().padStart(2, '0')} AM</div></div>
-                <div><span class="popup-label">Payload</span><div class="popup-val">${ord.weight || 0} kg • ${ord.volume || 0} m³</div></div>
-                <div><span class="popup-label">Service</span><div class="popup-val">${ord.service_time || 0} min</div></div>
-              </div>
-            </div>
-          `;
+            L.polyline(latlngs, {
+              color: '#000000',
+              weight: 6,
+              opacity: 0.5,
+              lineJoin: 'round',
+              lineCap: 'round'
+            }).addTo(routesLayerRef.current);
 
-          marker.bindPopup(popupHtml);
-
-          if (activeMarkerNode === node) {
-            marker.openPopup();
+            L.polyline(latlngs, {
+              color: vColor,
+              weight: 5.2,
+              opacity: 1.0,
+              lineJoin: 'round',
+              lineCap: 'round'
+            }).addTo(routesLayerRef.current);
+          } else {
+            // Other vans softly dimmed to remove visual spaghetti clutter
+            L.polyline(latlngs, {
+              color: vColor,
+              weight: 2.0,
+              opacity: 0.18,
+              lineJoin: 'round',
+              lineCap: 'round'
+            }).addTo(routesLayerRef.current);
           }
-        });
+        } else {
+          // Standard All Vans view: crisp routes with subtle road separation
+          L.polyline(latlngs, {
+            color: '#000000',
+            weight: 5.0,
+            opacity: 0.45,
+            lineJoin: 'round',
+            lineCap: 'round'
+          }).addTo(routesLayerRef.current);
+
+          L.polyline(latlngs, {
+            color: vColor,
+            weight: 3.4,
+            opacity: 0.92,
+            lineJoin: 'round',
+            lineCap: 'round'
+          }).addTo(routesLayerRef.current);
+        }
+
+        // Add Numbered Sequential Pins (skip other vans when one van is hovered to avoid pin clutter)
+        if (!hasAnyHover || isHovered) {
+          let seq = 1;
+          route.forEach((node, nodeIdx) => {
+            if (node === 0) return;
+            const c = coordsMap[node];
+            const ord = dayOrders[String(node)] || {};
+            if (!c) return;
+
+            const pinNumber = seq++;
+            const customPinIcon = L.divIcon({
+              className: 'custom-pin-container',
+              html: `<div class="stop-marker-pin" style="--pin-color: ${vColor}"><span>${pinNumber}</span></div>`,
+              iconSize: [20, 20],
+              iconAnchor: [10, 10]
+            });
+
+            const marker = L.marker([c.lat, c.lon], { icon: customPinIcon }).addTo(markersLayerRef.current);
+
+            const popupHtml = `
+              <div class="custom-popup-content">
+                <div class="custom-popup-header">
+                  <span class="popup-tag">STOP #${pinNumber}</span>
+                  <span class="popup-van-name" style="color: ${vColor}">VAN ${idx + 1}</span>
+                </div>
+                <div class="popup-facility-name">${c.name || `Clinic #${node}`}</div>
+                <div class="popup-med-type">📦 ${c.type || 'Vaccines & Cold-Chain'}</div>
+                <div class="popup-grid">
+                  <div><span class="popup-label">Time Window</span><div class="popup-val">[${ord.eat || 0} - ${ord.lat || 0}] min</div></div>
+                  <div><span class="popup-label">Scheduled ETA</span><div class="popup-val text-emerald">09:${(nodeIdx * 14 + 10).toString().padStart(2, '0')} AM</div></div>
+                  <div><span class="popup-label">Payload</span><div class="popup-val">${ord.weight || 0} kg • ${ord.volume || 0} m³</div></div>
+                  <div><span class="popup-label">Service</span><div class="popup-val">${ord.service_time || 0} min</div></div>
+                </div>
+              </div>
+            `;
+
+            marker.bindPopup(popupHtml);
+
+            if (activeMarkerNode === node) {
+              marker.openPopup();
+            }
+          });
+        }
       }
     });
 
@@ -660,7 +740,7 @@ export default function App() {
       map.fitBounds(L.latLngBounds(allBounds), { padding: [40, 40] });
     }
 
-  }, [day, scenario, engine, safeSelectedVehicle, showBackgroundRoutes, routes, coordsMap, coordsList, dayOrders, activeMarkerNode]);
+  }, [day, scenario, engine, safeSelectedVehicle, showBackgroundRoutes, routes, coordsMap, coordsList, dayOrders, activeMarkerNode, hoveredVehicle]);
 
   // Live Vehicle Simulation on Leaflet Map (Supports both Individual Van and All Vans Fleet Simulation)
   useEffect(() => {
@@ -750,12 +830,12 @@ export default function App() {
 
         marker.setLatLng([curLat, curLon]);
       });
-    }, 50);
+    }, Math.max(12, Math.round(50 / simSpeed)));
 
     return () => {
       cleanupSim();
     };
-  }, [isSimulating, safeSelectedVehicle, routes, coordsMap]);
+  }, [isSimulating, safeSelectedVehicle, routes, coordsMap, simSpeed]);
 
   // Turn-by-Turn Chronological Timeline
   const tourTimeline = useMemo(() => {
@@ -1086,76 +1166,86 @@ export default function App() {
             </div>
           )}
 
-          {/* 5 Sleek KPI Cards */}
-          <div className="kpi-grid">
-            <div className="kpi-card">
-              <div className="kpi-top">
-                <span className="kpi-label">Fleet Mileage</span>
-                <Route size={15} color="#38bdf8" />
-              </div>
-              <div className="kpi-value-row">
-                <span className="kpi-value">{totalDist}</span>
-                <span className="kpi-unit">km</span>
-              </div>
-              <div className="kpi-subtext">
-                <span>Avg {routes.length ? ((activeMetrics?.distance_km || 0) / routes.length).toFixed(1) : 0} km per van</span>
-              </div>
-            </div>
-
-            <div className="kpi-card">
-              <div className="kpi-top">
-                <span className="kpi-label">Fleet Transit</span>
-                <Clock size={15} color="#a855f7" />
-              </div>
-              <div className="kpi-value-row">
-                <span className="kpi-value">{totalTime}</span>
-                <span className="kpi-unit">hrs</span>
-              </div>
-              <div className="kpi-subtext">
-                <span>{activeMetrics?.travel_time_min || 0} total vehicle minutes</span>
-              </div>
-            </div>
-
-            <div className="kpi-card">
-              <div className="kpi-top">
-                <span className="kpi-label">Punctuality (OTR)</span>
-                <CheckCircle2 size={15} color="#10b981" />
-              </div>
-              <div className="kpi-value-row">
-                <span className="kpi-value text-emerald">{onTimeRate}%</span>
-              </div>
-              <div className="kpi-subtext" style={{ color: lateDeliveries === 0 ? '#34d399' : '#fbbf24' }}>
-                {lateDeliveries === 0 ? '✓ 100% on schedule' : `⚠️ ${lateDeliveries} clinics delayed`}
-              </div>
-            </div>
-
-            <div className="kpi-card">
-              <div className="kpi-top">
-                <span className="kpi-label">Delayed Deliveries</span>
-                <AlertTriangle size={15} color={lateDeliveries === 0 ? '#10b981' : '#f43f5e'} />
-              </div>
-              <div className="kpi-value-row">
-                <span className="kpi-value" style={{ color: lateDeliveries === 0 ? '#34d399' : '#fb7185' }}>
-                  {lateDeliveries}
+          {/* Compact Enterprise Logistics KPI HUD Strip */}
+          <div className="compact-kpi-hud">
+            <div className="kpi-hud-tile">
+              <div className="kpi-hud-left">
+                <span className="kpi-hud-label">Fleet Mileage</span>
+                <div className="kpi-hud-val-row">
+                  <span className="kpi-hud-val">{totalDist}</span>
+                  <span className="kpi-hud-unit">km</span>
+                </div>
+                <span className="kpi-hud-meta">
+                  Avg {routes.length ? ((activeMetrics?.distance_km || 0) / routes.length).toFixed(1) : 0} km / van
                 </span>
-                <span className="kpi-unit">stops</span>
               </div>
-              <div className="kpi-subtext">
-                {lateDeliveries === 0 ? 'Zero cold-chain SLA breach' : `${activeMetrics?.total_lateness_min?.toFixed(0) || 0} min total lateness`}
+              <div className="kpi-hud-icon" style={{ color: '#38bdf8' }}>
+                <Route size={16} />
               </div>
             </div>
 
-            <div className="kpi-card">
-              <div className="kpi-top">
-                <span className="kpi-label">Active Fleet</span>
-                <Truck size={15} color="#f59e0b" />
+            <div className="kpi-hud-tile">
+              <div className="kpi-hud-left">
+                <span className="kpi-hud-label">Fleet Transit</span>
+                <div className="kpi-hud-val-row">
+                  <span className="kpi-hud-val">{totalTime}</span>
+                  <span className="kpi-hud-unit">hrs</span>
+                </div>
+                <span className="kpi-hud-meta">
+                  {activeMetrics?.travel_time_min || 0} vehicle mins
+                </span>
               </div>
-              <div className="kpi-value-row">
-                <span className="kpi-value">{vanCount}</span>
-                <span className="kpi-unit">electric vans</span>
+              <div className="kpi-hud-icon" style={{ color: '#a855f7' }}>
+                <Clock size={16} />
               </div>
-              <div className="kpi-subtext">
-                <span>Dual knapsack: {simParams.capacityWeight}kg • {simParams.capacityVolume}m³</span>
+            </div>
+
+            <div className="kpi-hud-tile">
+              <div className="kpi-hud-left">
+                <span className="kpi-hud-label">Punctuality (OTR)</span>
+                <div className="kpi-hud-val-row">
+                  <span className="kpi-hud-val text-emerald">{onTimeRate}%</span>
+                </div>
+                <span className="kpi-hud-meta" style={{ color: lateDeliveries === 0 ? '#34d399' : '#fbbf24' }}>
+                  {lateDeliveries === 0 ? '✓ 100% on schedule' : `⚠️ ${lateDeliveries} clinics delayed`}
+                </span>
+              </div>
+              <div className="kpi-hud-icon" style={{ color: '#10b981' }}>
+                <CheckCircle2 size={16} />
+              </div>
+            </div>
+
+            <div className="kpi-hud-tile">
+              <div className="kpi-hud-left">
+                <span className="kpi-hud-label">Cold-Chain SLA</span>
+                <div className="kpi-hud-val-row">
+                  <span className="kpi-hud-val" style={{ color: lateDeliveries === 0 ? '#34d399' : '#fb7185' }}>
+                    {lateDeliveries}
+                  </span>
+                  <span className="kpi-hud-unit">delayed</span>
+                </div>
+                <span className="kpi-hud-meta">
+                  {lateDeliveries === 0 ? 'Zero thermal delay' : `${activeMetrics?.total_lateness_min?.toFixed(0) || 0}m breach`}
+                </span>
+              </div>
+              <div className="kpi-hud-icon" style={{ color: lateDeliveries === 0 ? '#10b981' : '#f43f5e' }}>
+                <AlertTriangle size={16} />
+              </div>
+            </div>
+
+            <div className="kpi-hud-tile">
+              <div className="kpi-hud-left">
+                <span className="kpi-hud-label">Active Fleet</span>
+                <div className="kpi-hud-val-row">
+                  <span className="kpi-hud-val">{vanCount}</span>
+                  <span className="kpi-hud-unit">EV vans</span>
+                </div>
+                <span className="kpi-hud-meta">
+                  Cap: {simParams.capacityWeight}kg • {simParams.capacityVolume}m³
+                </span>
+              </div>
+              <div className="kpi-hud-icon" style={{ color: '#f59e0b' }}>
+                <Truck size={16} />
               </div>
             </div>
           </div>
@@ -1179,7 +1269,7 @@ export default function App() {
                 </div>
 
                 <div className="gis-controls-right">
-                  {/* Van Selector Strip */}
+                  {/* Van Selector Strip with Hover Focus */}
                   <div className="van-pill-strip">
                     <button 
                       className={`van-pill-btn ${safeSelectedVehicle === null ? 'active' : ''}`}
@@ -1187,6 +1277,7 @@ export default function App() {
                         setSelectedVehicle(null);
                         setShowBackgroundRoutes(false);
                       }}
+                      onMouseEnter={() => setHoveredVehicle(null)}
                     >
                       All Vans
                     </button>
@@ -1198,6 +1289,8 @@ export default function App() {
                           setSelectedVehicle(idx);
                           setLastSelectedVehicle(idx);
                         }}
+                        onMouseEnter={() => setHoveredVehicle(idx)}
+                        onMouseLeave={() => setHoveredVehicle(null)}
                       >
                         <span className="color-indicator" style={{ backgroundColor: FLEET_COLORS[idx % FLEET_COLORS.length] }} />
                         Van {idx + 1}
@@ -1211,6 +1304,7 @@ export default function App() {
                     onClick={() => setMapTheme(mapTheme === 'dark' ? 'street' : 'dark')}
                     title="Switch Map Theme (Dark / Street View)"
                   >
+                    {mapTheme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
                     {mapTheme === 'dark' ? 'Street View' : 'Dark Cartography'}
                   </button>
 
@@ -1238,32 +1332,46 @@ export default function App() {
                       {showBackgroundRoutes ? 'Hide Context' : 'Fleet Context'}
                     </button>
                   )}
-
-                  {/* Simulation Button */}
-                  <button 
-                    className={`tool-btn ${isSimulating ? 'active' : ''}`}
-                    onClick={() => setIsSimulating(!isSimulating)}
-                    disabled={routes.length === 0}
-                    title={
-                      isSimulating 
-                        ? 'Stop GPS tracking simulation' 
-                        : (safeSelectedVehicle === null 
-                            ? 'Simulate all fleet vans moving simultaneously' 
-                            : `Simulate Van ${safeSelectedVehicle + 1} GPS movement`
-                          )
-                    }
-                  >
-                    {isSimulating ? <Square size={13} /> : <Play size={13} />}
-                    {isSimulating 
-                      ? 'Stop GPS' 
-                      : (safeSelectedVehicle === null ? 'Simulate All Vans' : `Track Van ${safeSelectedVehicle + 1}`)
-                    }
-                  </button>
                 </div>
               </div>
 
               <div className="leaflet-map-wrapper">
                 <div ref={mapContainerRef} className="leaflet-container" />
+
+                {/* Floating Glassmorphic Playback & Speed Dock */}
+                <div className="map-simulation-dock">
+                  <button 
+                    className={`sim-dock-play-btn ${isSimulating ? 'active' : ''}`}
+                    onClick={() => setIsSimulating(!isSimulating)}
+                    disabled={routes.length === 0}
+                    title={isSimulating ? 'Pause GPS tracking simulation' : 'Start live GPS fleet simulation'}
+                  >
+                    {isSimulating ? <Square size={13} fill="currentColor" /> : <Play size={13} fill="currentColor" />}
+                    <span>{isSimulating ? 'Pause GPS' : 'Simulate Fleet'}</span>
+                  </button>
+
+                  <div className="sim-speed-selector">
+                    {[1, 2, 4].map(spd => (
+                      <button
+                        key={spd}
+                        className={`sim-speed-btn ${simSpeed === spd ? 'active' : ''}`}
+                        onClick={() => setSimSpeed(spd)}
+                        title={`Simulation Speed ${spd}x`}
+                      >
+                        {spd}x
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="sim-status-indicator">
+                    <span className={`sim-pulse-dot ${isSimulating ? 'live' : ''}`} />
+                    <span className="sim-status-text">
+                      {isSimulating 
+                        ? (safeSelectedVehicle === null ? `Simulating ${routes.length} Vans` : `Simulating Van ${safeSelectedVehicle + 1}`)
+                        : 'GPS Inactive'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1288,8 +1396,37 @@ export default function App() {
                 </span>
               </div>
 
+              {/* Telemetry Exception & SLA Alert Ticker */}
+              <div className={`telemetry-sla-ticker ${lateDeliveries === 0 ? 'nominal' : 'warning'}`}>
+                {lateDeliveries === 0 ? (
+                  <>
+                    <CheckCircle2 size={13} color="#10b981" />
+                    <span>Cold-Chain SLA Nominal • 0 Breaches across Athens Network</span>
+                  </>
+                ) : (
+                  <>
+                    <AlertTriangle size={13} color="#f43f5e" />
+                    <span>Attention: {lateDeliveries} clinics delayed • {activeMetrics?.total_lateness_min?.toFixed(0) || 0}m total lateness</span>
+                  </>
+                )}
+              </div>
+
               {activeVan ? (
                 <div className="van-telemetry-meta">
+                  <div className="van-back-all-strip">
+                    <button 
+                      className="back-all-btn"
+                      onClick={() => {
+                        setSelectedVehicle(null);
+                        setShowBackgroundRoutes(false);
+                      }}
+                      title="Return to full fleet view"
+                    >
+                      <ArrowLeft size={12} /> Back to All Vans
+                    </button>
+                    <span className="fleet-context-indicator">Van {activeVan.id + 1} of {routes.length}</span>
+                  </div>
+
                   <div className="driver-strip">
                     <span>Driver: <strong>{activeVan.driver}</strong></span>
                     <span className="system-status-pill">
@@ -1439,6 +1576,8 @@ export default function App() {
                             setSelectedVehicle(v.id);
                             setLastSelectedVehicle(v.id);
                           }}
+                          onMouseEnter={() => setHoveredVehicle(v.id)}
+                          onMouseLeave={() => setHoveredVehicle(null)}
                           title={`Click to inspect Van ${v.id + 1} (${v.driver})`}
                         >
                           <div className="fleet-circuit-top">
@@ -1476,67 +1615,91 @@ export default function App() {
             </div>
           </div>
 
-          {/* Clinic Manifest Table */}
+          {/* Collapsible Delivery Stop Manifest Drawer */}
           <div className="manifest-panel">
-            <div className="table-header">
+            <div 
+              className="table-header manifest-clickable-header"
+              onClick={() => setManifestExpanded(!manifestExpanded)}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Truck size={15} color="#38bdf8" />
                 <span style={{ fontSize: '0.86rem', fontWeight: 700, color: '#ffffff' }}>
                   Pharmaceutical Delivery Stop Manifest
                 </span>
-                <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>({filteredManifest.length} destinations)</span>
+                <span style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+                  ({filteredManifest.length} destinations)
+                </span>
+                <span className="manifest-drawer-badge">
+                  {manifestExpanded ? 'Expanded' : 'Click to View Table'}
+                </span>
               </div>
 
-              <div className="search-input-box">
-                <Search size={13} color="#64748b" />
-                <input 
-                  type="text" 
-                  placeholder="Search clinic or hospital..."
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="search-input"
-                />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} onClick={e => e.stopPropagation()}>
+                {manifestExpanded && (
+                  <div className="search-input-box">
+                    <Search size={13} color="#64748b" />
+                    <input 
+                      type="text" 
+                      placeholder="Search clinic or hospital..."
+                      value={searchQuery}
+                      onChange={e => setSearchQuery(e.target.value)}
+                      className="search-input"
+                    />
+                  </div>
+                )}
+                <button 
+                  className="manifest-toggle-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setManifestExpanded(!manifestExpanded);
+                  }}
+                  title={manifestExpanded ? "Collapse manifest drawer" : "Expand manifest drawer"}
+                >
+                  {manifestExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
               </div>
             </div>
 
-            <div className="table-responsive">
-              <table className="manifest-table">
-                <thead>
-                  <tr>
-                    <th>Stop #</th>
-                    <th>Assigned Van</th>
-                    <th>Healthcare Facility</th>
-                    <th>Pharmaceutical Cargo</th>
-                    <th>Time Window</th>
-                    <th>Weight</th>
-                    <th>Volume</th>
-                    <th>Service Time</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredManifest.slice(0, 30).map((row, idx) => (
-                    <tr key={idx}>
-                      <td style={{ fontWeight: 700, color: '#ffffff', fontFamily: 'var(--font-mono)' }}>#{row.seq}</td>
-                      <td style={{ fontWeight: 600, color: FLEET_COLORS[(row.vehicleId - 1) % FLEET_COLORS.length] }}>
-                        Van {row.vehicleId}
-                      </td>
-                      <td style={{ fontWeight: 600, color: '#f8fafc' }}>{row.facility}</td>
-                      <td style={{ color: '#94a3b8', fontSize: '0.74rem' }}>{row.medType}</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>[{row.eat} - {row.lat}] min</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>{row.weight} kg</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>{row.volume} m³</td>
-                      <td style={{ fontFamily: 'var(--font-mono)' }}>{row.service} min</td>
-                      <td>
-                        <span style={{ color: '#34d399', fontWeight: 600, fontSize: '0.72rem' }}>
-                          ✓ On Schedule
-                        </span>
-                      </td>
+            {manifestExpanded && (
+              <div className="table-responsive">
+                <table className="manifest-table">
+                  <thead>
+                    <tr>
+                      <th>Stop #</th>
+                      <th>Assigned Van</th>
+                      <th>Healthcare Facility</th>
+                      <th>Pharmaceutical Cargo</th>
+                      <th>Time Window</th>
+                      <th>Weight</th>
+                      <th>Volume</th>
+                      <th>Service Time</th>
+                      <th>Status</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {filteredManifest.slice(0, 30).map((row, idx) => (
+                      <tr key={idx}>
+                        <td style={{ fontWeight: 700, color: '#ffffff', fontFamily: 'var(--font-mono)' }}>#{row.seq}</td>
+                        <td style={{ fontWeight: 600, color: FLEET_COLORS[(row.vehicleId - 1) % FLEET_COLORS.length] }}>
+                          Van {row.vehicleId}
+                        </td>
+                        <td style={{ fontWeight: 600, color: '#f8fafc' }}>{row.facility}</td>
+                        <td style={{ color: '#94a3b8', fontSize: '0.74rem' }}>{row.medType}</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>[{row.eat} - {row.lat}] min</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>{row.weight} kg</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>{row.volume} m³</td>
+                        <td style={{ fontFamily: 'var(--font-mono)' }}>{row.service} min</td>
+                        <td>
+                          <span style={{ color: '#34d399', fontWeight: 600, fontSize: '0.72rem' }}>
+                            ✓ On Schedule
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1653,7 +1816,7 @@ export default function App() {
                 {/* Payload Capacity Slider */}
                 <div className="param-slider-group">
                   <div className="param-header">
-                    <span className="param-name">Van Payload Limit ($C_w$)</span>
+                    <span className="param-name">Van Payload Capacity (kg)</span>
                     <span className="param-val">{simParams.capacityWeight} kg</span>
                   </div>
                   <input 
@@ -1675,7 +1838,7 @@ export default function App() {
                 {/* Cargo Volume Capacity Slider */}
                 <div className="param-slider-group">
                   <div className="param-header">
-                    <span className="param-name">Cargo Volume Limit ($C_v$)</span>
+                    <span className="param-name">Cargo Volume Limit (m³)</span>
                     <span className="param-val">{simParams.capacityVolume.toFixed(1)} m³</span>
                   </div>
                   <input 
@@ -1697,7 +1860,7 @@ export default function App() {
                 {/* Shift Cutoff Duration Slider */}
                 <div className="param-slider-group">
                   <div className="param-header">
-                    <span className="param-name">Driver Max Shift Duration ($T_&#123;\max&#125;$)</span>
+                    <span className="param-name">Driver Max Shift Duration (hrs)</span>
                     <span className="param-val">{simParams.maxShiftDuration} min ({(simParams.maxShiftDuration / 60).toFixed(1)} hrs)</span>
                   </div>
                   <input 
@@ -1743,7 +1906,7 @@ export default function App() {
                 {/* Multi-Objective Priority Weights */}
                 <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '16px' }}>
                   <div className="card-section-title" style={{ marginBottom: '12px' }}>
-                    <Gauge size={15} color="#a855f7" /> Objective Weights ($Z = \alpha D + \beta T + \gamma L$)
+                    <Gauge size={15} color="#a855f7" /> Multi-Objective Balancing Weights (Distance • Transit • SLA)
                   </div>
 
                   <div className="weight-sliders-row">
@@ -1793,19 +1956,30 @@ export default function App() {
                   <Activity size={15} color="#10b981" /> Live Simulation Outcome & Feasibility Check
                 </div>
 
+                {isSolving && (
+                  <div className="solver-solving-bar">
+                    <RotateCcw size={13} className="spin-icon" color="#38bdf8" />
+                    <span>Optimizing Athens Fleet via Python Backend...</span>
+                  </div>
+                )}
+
                 <div className="solver-details-box">
                   <div>
                     <span>Active Solver: </span>
-                    <strong>{dynamicSolution?.solver_engine || (engine === 'decomposed' ? 'Decomposed MILP (HiGHS)' : 'Greedy Nearest-Neighbor')}</strong>
+                    <strong>{isSolving ? 'Optimizing in progress...' : (dynamicSolution?.solver_engine || (engine === 'decomposed' ? 'Decomposed MILP (HiGHS)' : 'Greedy Nearest-Neighbor'))}</strong>
                   </div>
                   <div>
                     <span>Runtime: </span>
                     <strong>
-                      {dynamicSolution?.solve_time_sec !== undefined 
-                        ? `${dynamicSolution.solve_time_sec}s` 
-                        : `${dynamicSolution?.metrics?.runtime_ms || 1.2}ms`}
+                      {isSolving ? (
+                        'Solving...'
+                      ) : (
+                        dynamicSolution?.solve_time_sec !== undefined 
+                          ? `${dynamicSolution.solve_time_sec}s` 
+                          : `${dynamicSolution?.metrics?.runtime_ms || 1.2}ms`
+                      )}
                     </strong>
-                    {dynamicSolution?.is_python_backend && (
+                    {!isSolving && dynamicSolution?.is_python_backend && (
                       <span style={{ color: '#34d399', marginLeft: '6px' }}>(Python Backend)</span>
                     )}
                   </div>

@@ -92,10 +92,16 @@ class FeasibilityAwareDecomposition:
         tot_weight = sum(instance.orders[n].weight_kg for n in customers)
         tot_vol = sum(instance.orders[n].volume_m3 for n in customers)
 
-        # Estimate number of clusters required based on weight, volume, and target cluster size
+        # Estimate number of clusters required based on weight, volume, shift limit, and cluster size
+        effective_max_size = self.max_cluster_size
+        if self.config.max_route_duration_min <= 270:
+            effective_max_size = min(effective_max_size, 12)
+        elif self.config.max_route_duration_min <= 330:
+            effective_max_size = min(effective_max_size, 15)
+
         min_k_w = int(np.ceil(tot_weight / (cap_w * 0.95)))
         min_k_v = int(np.ceil(tot_vol / (cap_v * 0.95)))
-        min_k_size = int(np.ceil(len(customers) / self.max_cluster_size))
+        min_k_size = int(np.ceil(len(customers) / effective_max_size))
         K = max(min_k_w, min_k_v, min_k_size, 1)
 
         # Step 1: Select K seed medoids using Max-Min Dispersion from depot
@@ -196,10 +202,16 @@ class FeasibilityAwareDecomposition:
         cluster_sols: List[OptimizationSolution] = []
 
         for c in clusters:
-            # Capacity-required vehicles + flexibility buffer (up to 2) to ensure shift feasibility
-            k_cluster = int(np.ceil(max(c.total_weight_kg / self.config.capacity_weight_kg, c.total_volume_m3 / self.config.capacity_volume_m3)))
-            # If fleet_size constraint is active, tightly allocate vehicles based on capacity
-            fleet_available = min(len(c.customer_nodes), max(k_cluster, 1 if self.config.fleet_size is not None else 2))
+            # Capacity and shift-duration required vehicles + flexibility buffer to ensure feasibility
+            k_cap = int(np.ceil(max(c.total_weight_kg / self.config.capacity_weight_kg, c.total_volume_m3 / self.config.capacity_volume_m3)))
+            tot_service = sum(instance.orders[n].service_time_min for n in c.customer_nodes if n in instance.orders)
+            min_transit_est = 30.0 + len(c.customer_nodes) * 10.0
+            k_shift = int(np.ceil((tot_service + min_transit_est) / max(self.config.max_route_duration_min, 60.0)))
+            k_cluster = max(k_cap, k_shift)
+
+            # If fleet_size constraint is active, tightly allocate vehicles based on capacity, else give adequate vehicles
+            min_veh_target = max(k_cluster, 1 if self.config.fleet_size is not None else 2)
+            fleet_available = min(len(c.customer_nodes), min_veh_target)
             cluster_veh_cfg = VehicleConfig(
                 capacity_weight_kg=self.config.capacity_weight_kg,
                 capacity_volume_m3=self.config.capacity_volume_m3,
