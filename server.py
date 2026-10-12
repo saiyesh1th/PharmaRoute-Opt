@@ -17,8 +17,20 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+import logging
 from pydantic import BaseModel, Field
 import uvicorn
+
+# Prevent [WinError 6] The handle is invalid when console streams are disconnected in Windows terminals
+class SafeStreamHandler(logging.StreamHandler):
+    def emit(self, record):
+        try:
+            super().emit(record)
+        except OSError:
+            pass
+
+logging.getLogger("uvicorn.access").handlers = [SafeStreamHandler()]
+logging.getLogger("uvicorn.error").handlers = [SafeStreamHandler()]
 
 from src.data.loader import DataLoader
 from src.data.schema import DeliveryInstance, VehicleConfig
@@ -26,11 +38,14 @@ from src.baseline.nearest_neighbor import NearestNeighborCVRPTW
 from src.optimization.decomposition import FeasibilityAwareDecomposition
 from src.evaluation.metrics import MetricsCalculator, SolutionMetrics
 
-# Configure UTF-8 encoding for Windows consoles
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
-if hasattr(sys.stderr, 'reconfigure'):
-    sys.stderr.reconfigure(encoding='utf-8')
+# Configure UTF-8 encoding for Windows consoles safely
+try:
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    if hasattr(sys.stderr, 'reconfigure'):
+        sys.stderr.reconfigure(encoding='utf-8')
+except (OSError, ValueError):
+    pass
 
 app = FastAPI(
     title="PharmaRoute-Opt Optimization API",
@@ -247,7 +262,12 @@ def run_optimization(req: OptimizeRequest):
 
     try:
         if req.engine == "greedy":
-            solver = NearestNeighborCVRPTW(veh_config)
+            solver = NearestNeighborCVRPTW(
+                vehicle_config=veh_config,
+                alpha=req.alpha_distance,
+                beta=req.beta_time,
+                gamma=req.gamma_lateness
+            )
             sol = solver.solve(instance, scenario=scenario)
             routes = [r.stops for r in sol.routes]
             engine_name = "Python Nearest-Neighbor CVRPTW"
@@ -327,6 +347,7 @@ def run_optimization(req: OptimizeRequest):
             "vehicles": global_metrics.vehicles_used,
             "vehicles_used": global_metrics.vehicles_used,
             "late_deliveries": global_metrics.late_deliveries,
+            "unserved_deliveries": global_metrics.unserved_deliveries,
             "total_lateness_min": round(global_metrics.total_lateness_min),
             "on_time_rate_pct": round(global_metrics.on_time_rate_pct, 1),
             "weight_utilization_pct": round(global_metrics.weight_utilization_pct, 1),
@@ -345,4 +366,4 @@ if __name__ == "__main__":
     print(" PharmaRoute-Opt: FastAPI Operations Research Server")
     print(" Starting HTTP API at http://127.0.0.1:8000")
     print("=" * 60 + "\n")
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000, access_log=False)

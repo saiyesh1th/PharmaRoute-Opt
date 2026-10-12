@@ -359,7 +359,8 @@ export default function App() {
       : 100;
     const estVehicles = routes.length;
 
-    const driverHours = (simTravelTime + 78 * 6) / 60;
+    const totalDayServiceMin = Object.values(dayOrders).reduce((sum, ord) => sum + (ord.service_time || ord.service || 6.0), 0);
+    const driverHours = (simTravelTime + totalDayServiceMin) / 60;
     const fuelCost = simDistance * 0.38;
     const laborCost = driverHours * 22.50;
     const totalCost = Math.round(fuelCost + laborCost);
@@ -376,7 +377,7 @@ export default function App() {
     const baseOTR = baselineMetrics?.on_time_rate_pct !== undefined 
       ? Number(baselineMetrics.on_time_rate_pct.toFixed(1)) 
       : 100;
-    const baseDriverHours = (baseTime + 78 * 6) / 60;
+    const baseDriverHours = (baseTime + totalDayServiceMin) / 60;
     const baseCost = Math.round(baseDist * 0.38 + baseDriverHours * 22.50);
 
     const deltaVehicles = estVehicles - baseVehicles;
@@ -398,6 +399,8 @@ export default function App() {
       simLateDeliveries,
       simOnTimeRate,
       estVehicles,
+      totalDayServiceMin,
+      totalDutyHours: Number(((simTravelTime + totalDayServiceMin) / 60).toFixed(1)),
       totalCost,
       co2ElectricKg,
       co2SavingsKg,
@@ -2022,17 +2025,22 @@ export default function App() {
                   </div>
 
                   <div className="sim-kpi-box">
-                    <span className="sim-kpi-label">Transit Time Under Traffic</span>
+                    <span className="sim-kpi-label">Fleet Transit Time (Driving)</span>
                     <span className="sim-kpi-val">
                       {simulationResults ? (simulationResults.simTravelTime / 60).toFixed(1) : 0} hrs
                     </span>
-                    <span className="sim-kpi-delta">
-                      {simulationResults?.simTravelTime} mins
-                      {isCustomParams && simulationResults?.deltaTime !== undefined && simulationResults.deltaTime !== 0 && (
-                        <span className={simulationResults.deltaTime < 0 ? 'delta-good' : 'delta-bad'}>
-                          {' '}({simulationResults.deltaTime > 0 ? `+${simulationResults.deltaTime}m` : `${simulationResults.deltaTime}m`} vs base)
-                        </span>
-                      )}
+                    <span className="sim-kpi-delta" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span>
+                        {simulationResults?.simTravelTime} mins driving
+                        {isCustomParams && simulationResults?.deltaTime !== undefined && simulationResults.deltaTime !== 0 && (
+                          <span className={simulationResults.deltaTime < 0 ? 'delta-good' : 'delta-bad'}>
+                            {' '}({simulationResults.deltaTime > 0 ? `+${simulationResults.deltaTime}m` : `${simulationResults.deltaTime}m`} vs base)
+                          </span>
+                        )}
+                      </span>
+                      <span style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+                        Total duty: {simulationResults?.totalDutyHours || 0} hrs (incl. {simulationResults?.totalDayServiceMin || 496}m service)
+                      </span>
                     </span>
                   </div>
 

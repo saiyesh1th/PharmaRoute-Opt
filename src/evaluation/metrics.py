@@ -16,6 +16,7 @@ class SolutionMetrics:
     total_lateness_min: float
     weight_utilization_pct: float
     volume_utilization_pct: float
+    unserved_deliveries: int = 0
 
     def to_dict(self) -> Dict[str, Any]:
         return {
@@ -26,6 +27,7 @@ class SolutionMetrics:
             "vehicles_used": self.vehicles_used,
             "on_time_rate_pct": self.on_time_rate_pct,
             "late_deliveries": self.late_deliveries,
+            "unserved_deliveries": self.unserved_deliveries,
             "total_lateness_min": self.total_lateness_min,
             "weight_utilization_pct": self.weight_utilization_pct,
             "volume_utilization_pct": self.volume_utilization_pct,
@@ -80,7 +82,11 @@ class MetricsCalculator:
                     curr_time += t_travel
 
         vehicles = len(routes)
-        otr = ((served_count - late_deliveries) / served_count * 100.0) if served_count > 0 else 0.0
+        total_orders_count = len(orders) if orders else served_count
+        unserved_count = max(0, total_orders_count - served_count)
+        # On-Time Rate: percent of total demanded orders served on time
+        on_time_count = max(0, served_count - late_deliveries)
+        otr = (on_time_count / total_orders_count * 100.0) if total_orders_count > 0 else 0.0
         tot_cap_w = vehicles * capacity_weight
         tot_cap_v = vehicles * capacity_volume
         w_util = (total_weight / tot_cap_w * 100.0) if tot_cap_w > 0 else 0.0
@@ -96,5 +102,6 @@ class MetricsCalculator:
             late_deliveries=late_deliveries,
             total_lateness_min=round(total_lateness, 2),
             weight_utilization_pct=round(w_util, 2),
-            volume_utilization_pct=round(v_util, 2)
+            volume_utilization_pct=round(v_util, 2),
+            unserved_deliveries=unserved_count
         )

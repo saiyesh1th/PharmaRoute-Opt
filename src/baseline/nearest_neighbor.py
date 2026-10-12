@@ -44,9 +44,19 @@ class NearestNeighborCVRPTW:
     with Time Windows (CVRPTW) and service times.
     """
 
-    def __init__(self, vehicle_config: VehicleConfig = None, allow_soft_tw: bool = True):
+    def __init__(
+        self,
+        vehicle_config: VehicleConfig = None,
+        allow_soft_tw: bool = True,
+        alpha: float = 0.20,
+        beta: float = 0.20,
+        gamma: float = 0.60
+    ):
         self.config = vehicle_config if vehicle_config is not None else VehicleConfig()
         self.allow_soft_tw = allow_soft_tw
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
 
     def solve(self, instance: DeliveryInstance, scenario: str = "mostlikely") -> BaselineSolution:
         """Solves the CVRPTW instance using sequential nearest-neighbor route construction."""
@@ -117,8 +127,10 @@ class NearestNeighborCVRPTW:
                     # No more feasible nodes can be added to this vehicle route
                     break
 
-                # Greedy selection: prioritize minimum distance, with penalty for lateness
-                feasible_candidates.sort(key=lambda x: (x["lateness"] * 2.0 + x["distance"]))
+                # Multi-objective selection using alpha (dist), beta (time), gamma (lateness penalty)
+                feasible_candidates.sort(
+                    key=lambda x: (self.alpha * x["distance"] + self.beta * (x["travel_time"] * 1.5) + self.gamma * (x["lateness"] * 8.0))
+                )
                 chosen = feasible_candidates[0]
 
                 # Advance to chosen node
