@@ -70,6 +70,14 @@ export default function App() {
   const [simParams, setSimParams] = useState(DEFAULT_PARAMS);
   const [benchmarkFilter, setBenchmarkFilter] = useState('all');
 
+  // Python Backend Connection & Solver State
+  const [backendStatus, setBackendStatus] = useState('checking'); // 'connected' | 'offline' | 'checking'
+  const [isSolving, setIsSolving] = useState(false);
+  const [backendSolution, setBackendSolution] = useState(null);
+  const [autoOptimize, setAutoOptimize] = useState(true);
+  const [solveNotification, setSolveNotification] = useState(null);
+  const debounceTimerRef = useRef(null);
+
   // Refs for Leaflet Map
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
@@ -108,11 +116,90 @@ export default function App() {
   const baselineRunData = pharmaData.routes?.[runKey] || null;
   const baselineMetrics = baselineRunData ? baselineRunData[engine] : null;
 
-  // Real-Time Dynamic Solver: Runs the optimization algorithm with the updated parameters!
-  const dynamicSolution = useMemo(() => {
+  // Trigger Real Python Backend Optimization
+  const triggerPythonOptimization = async (customParams = simParams, targetDay = day, targetScenario = scenario, targetEngine = engine) => {
+    setIsSolving(true);
+    try {
+      const res = await fetch('/api/optimize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          day: targetDay,
+          scenario: targetScenario,
+          engine: targetEngine,
+          capacity_weight: customParams.capacityWeight,
+          capacity_volume: customParams.capacityVolume,
+          max_shift_duration: customParams.maxShiftDuration,
+          traffic_multiplier: customParams.trafficMultiplier,
+          alpha_distance: customParams.alphaDistance,
+          beta_time: customParams.betaTime,
+          gamma_lateness: customParams.gammaLateness,
+          time_limit_sec: 10
+        })
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setBackendSolution(data);
+      setBackendStatus('connected');
+      setSolveNotification(`Solved via Python ${targetEngine === 'decomposed' ? 'HiGHS MILP' : 'Nearest-Neighbor'} in ${data.solve_time_sec ? `${data.solve_time_sec}s` : `${data.solve_time_ms}ms`}`);
+      setTimeout(() => setSolveNotification(null), 5000);
+    } catch (err) {
+      console.warn('Python backend offline or error, falling back to client solver:', err);
+      setBackendStatus('offline');
+    } finally {
+      setIsSolving(false);
+    }
+  };
+
+  // Health check for Python FastAPI backend
+  useEffect(() => {
+    let active = true;
+    const check = async () => {
+      try {
+        const res = await fetch('/api/health');
+        if (res.ok) {
+          const d = await res.json();
+          if (active && d.status === 'healthy') {
+            setBackendStatus('connected');
+            return;
+          }
+        }
+      } catch {}
+      if (active) setBackendStatus('offline');
+    };
+    check();
+    const interval = setInterval(check, 10000);
+    return () => { active = false; clearInterval(interval); };
+  }, []);
+
+  // Debounced Auto-Optimization when Parameters change
+  useEffect(() => {
+    if (!isCustomParams || !autoOptimize || backendStatus !== 'connected') return;
+
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => {
+      triggerPythonOptimization(simParams, day, scenario, engine);
+    }, 600);
+
+    return () => {
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, [isCustomParams, simParams, day, scenario, engine, autoOptimize, backendStatus]);
+
+  // Fast Client-side fallback solution (CVRPTW in browser)
+  const clientSolution = useMemo(() => {
     if (!isCustomParams) return null;
     return solveDynamicFleet(day, scenario, engine, simParams, dayOrders, dayMatrix);
   }, [isCustomParams, day, scenario, engine, simParams, dayOrders, dayMatrix]);
+
+  // Unified Dynamic Solution: prefers Python backend solution if fresh & matching, else client fallback
+  const dynamicSolution = useMemo(() => {
+    if (!isCustomParams) return null;
+    if (backendSolution && backendSolution.day === day && backendSolution.scenario === scenario && backendSolution.engine === engine) {
+      return backendSolution;
+    }
+    return clientSolution;
+  }, [isCustomParams, backendSolution, clientSolution, day, scenario, engine]);
 
   // Active Metrics: dynamically driven by solver when parameters are tweaked, else baseline
   const activeMetrics = useMemo(() => {
@@ -759,6 +846,7 @@ export default function App() {
 
   // Preset Handlers for Parameter Studio
   const applyPreset = (presetName) => {
+    setBackendSolution(null);
     switch(presetName) {
       case 'balanced':
         setSimParams({ ...DEFAULT_PARAMS });
@@ -857,6 +945,17 @@ export default function App() {
           </nav>
 
           <div className="navbar-right">
+            {backendStatus === 'connected' ? (
+              <div className="backend-pill connected" title="Python FastAPI Optimization Backend Connected (HiGHS MILP & Nearest-Neighbor)">
+                <span className="status-dot-pulse-green" />
+                <span>Python OR Engine: Live</span>
+              </div>
+            ) : (
+              <div className="backend-pill offline" title="Run 'python server.py' to enable the Python HiGHS backend">
+                <span className="status-dot-orange" />
+                <span>Client Engine (Server Offline)</span>
+              </div>
+            )}
             <div className="clock-telemetry">
               <Clock size={13} color="#38bdf8" />
               <span>Shift: 08:00 - 14:00 (360m)</span>
@@ -957,8 +1056,8 @@ export default function App() {
           {isCustomParams && (
             <div className="dynamic-optimization-banner">
               <div className="dynamic-banner-left">
-                <span className="live-status-pulse-badge">
-                  <span className="live-pulse-dot" /> LIVE RE-OPTIMIZED
+                <span className={`live-status-pulse-badge ${dynamicSolution?.is_python_backend ? 'python-badge' : ''}`}>
+                  <span className="live-pulse-dot" /> {dynamicSolution?.is_python_backend ? '🐍 PYTHON HiGHS ENGINE' : 'LIVE RE-OPTIMIZED'}
                 </span>
                 <span className="dynamic-banner-text">
                   Fleet routing re-solved dynamically with custom constraints: 
@@ -968,9 +1067,11 @@ export default function App() {
                   {Math.abs(simParams.trafficMultiplier - 1.0) > 0.001 && (
                     <> • <strong>{simParams.trafficMultiplier.toFixed(2)}x traffic</strong></>
                   )}
-                  {dynamicSolution?.metrics?.runtime_ms !== undefined && (
+                  {dynamicSolution?.solve_time_sec !== undefined ? (
+                    <span className="dynamic-banner-runtime"> (Solved in {dynamicSolution.solve_time_sec}s by {dynamicSolution.solver_engine})</span>
+                  ) : dynamicSolution?.metrics?.runtime_ms !== undefined ? (
                     <span className="dynamic-banner-runtime"> (Solved in {dynamicSolution.metrics.runtime_ms}ms)</span>
-                  )}
+                  ) : null}
                 </span>
               </div>
               <div className="dynamic-banner-right">
@@ -1490,6 +1591,55 @@ export default function App() {
                   ⚡ Compact Electric Fleet
                 </button>
               </div>
+
+              {/* Python Backend Optimization Command Bar */}
+              <div className="backend-control-banner">
+                <div className="backend-banner-status">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className={`engine-dot ${backendStatus === 'connected' ? 'active' : 'warn'}`} />
+                    <span className="engine-name-text">
+                      {backendStatus === 'connected' ? (
+                        <><strong>Python Backend Online:</strong> Connected to HiGHS MILP / PuLP Engine</>
+                      ) : (
+                        <><strong>Python Server Offline:</strong> Run <code>python server.py</code> in terminal for HiGHS MILP</>
+                      )}
+                    </span>
+                  </div>
+                  {solveNotification && (
+                    <span className="solve-notify-badge">
+                      <CheckCircle2 size={12} color="#34d399" /> {solveNotification}
+                    </span>
+                  )}
+                </div>
+
+                <div className="backend-banner-actions">
+                  <label className="auto-toggle-check" title="Automatically re-run optimization when adjusting parameters">
+                    <input 
+                      type="checkbox" 
+                      checked={autoOptimize} 
+                      onChange={e => setAutoOptimize(e.target.checked)} 
+                    />
+                    <span>Live Auto-Solve</span>
+                  </label>
+
+                  <button 
+                    className="run-python-opt-btn"
+                    onClick={() => triggerPythonOptimization()}
+                    disabled={isSolving}
+                    title="Execute the full Python Operations Research algorithm with current parameters"
+                  >
+                    {isSolving ? (
+                      <>
+                        <RotateCcw size={13} className="spin-icon" /> Solving via Python...
+                      </>
+                    ) : (
+                      <>
+                        <Play size={13} fill="currentColor" /> Run Python Optimization ({engine === 'decomposed' ? 'HiGHS MILP' : 'Greedy'})
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Studio 2-Column Grid */}
@@ -1641,6 +1791,24 @@ export default function App() {
               <div className="studio-impact-card">
                 <div className="card-section-title">
                   <Activity size={15} color="#10b981" /> Live Simulation Outcome & Feasibility Check
+                </div>
+
+                <div className="solver-details-box">
+                  <div>
+                    <span>Active Solver: </span>
+                    <strong>{dynamicSolution?.solver_engine || (engine === 'decomposed' ? 'Decomposed MILP (HiGHS)' : 'Greedy Nearest-Neighbor')}</strong>
+                  </div>
+                  <div>
+                    <span>Runtime: </span>
+                    <strong>
+                      {dynamicSolution?.solve_time_sec !== undefined 
+                        ? `${dynamicSolution.solve_time_sec}s` 
+                        : `${dynamicSolution?.metrics?.runtime_ms || 1.2}ms`}
+                    </strong>
+                    {dynamicSolution?.is_python_backend && (
+                      <span style={{ color: '#34d399', marginLeft: '6px' }}>(Python Backend)</span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Feasibility Alert */}

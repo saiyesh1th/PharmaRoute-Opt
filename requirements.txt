@@ -17,8 +17,11 @@ networkx>=3.2.0
 pyyaml>=6.0.1
 pydantic>=2.7.0
 
-# Interactive Decision Support UI
+# Interactive Decision Support UI & API Server
 streamlit>=1.35.0
+fastapi>=0.111.0
+uvicorn>=0.30.0
+httpx>=0.27.0
 
 # Testing & Quality
 pytest>=8.0.0
