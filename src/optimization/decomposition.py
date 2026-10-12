@@ -92,10 +92,16 @@ class FeasibilityAwareDecomposition:
         tot_weight = sum(instance.orders[n].weight_kg for n in customers)
         tot_vol = sum(instance.orders[n].volume_m3 for n in customers)
 
-        # Estimate number of clusters required based on weight, volume, and target cluster size
+        # Estimate number of clusters required based on weight, volume, shift limit, and cluster size
+        effective_max_size = self.max_cluster_size
+        if self.config.max_route_duration_min <= 270:
+            effective_max_size = min(effective_max_size, 12)
+        elif self.config.max_route_duration_min <= 330:
+            effective_max_size = min(effective_max_size, 15)
+
         min_k_w = int(np.ceil(tot_weight / (cap_w * 0.95)))
         min_k_v = int(np.ceil(tot_vol / (cap_v * 0.95)))
-        min_k_size = int(np.ceil(len(customers) / self.max_cluster_size))
+        min_k_size = int(np.ceil(len(customers) / effective_max_size))
         K = max(min_k_w, min_k_v, min_k_size, 1)
 
         # Step 1: Select K seed medoids using Max-Min Dispersion from depot
@@ -196,10 +202,18 @@ class FeasibilityAwareDecomposition:
         cluster_sols: List[OptimizationSolution] = []
 
         for c in clusters:
-            # Capacity-required vehicles + flexibility buffer (up to 2) to ensure shift feasibility
-            k_cluster = int(np.ceil(max(c.total_weight_kg / self.config.capacity_weight_kg, c.total_volume_m3 / self.config.capacity_volume_m3)))
-            # If fleet_size constraint is active, tightly allocate vehicles based on capacity
-            fleet_available = min(len(c.customer_nodes), max(k_cluster, 1 if self.config.fleet_size is not None else 2))
+            # Capacity and shift-duration required vehicles + flexibility buffer to ensure feasibility
+            k_cap = int(np.ceil(max(c.total_weight_kg / self.config.capacity_weight_kg, c.total_volume_m3 / self.config.capacity_volume_m3)))
+            tot_service = sum(instance.orders[n].service_time_min for n in c.customer_nodes if n in instance.orders)
+            time_mat_scen = instance.get_time_matrix(scenario)
+            avg_edge_time = float(np.mean(time_mat_scen[c.customer_nodes, :][:, c.customer_nodes])) if len(c.customer_nodes) > 1 else 15.0
+            min_transit_est = 40.0 + len(c.customer_nodes) * max(avg_edge_time, 10.0)
+            k_shift = int(np.ceil((tot_service + min_transit_est) / max(self.config.max_route_duration_min, 60.0)))
+            k_cluster = max(k_cap, k_shift)
+
+            # If fleet_size constraint is active, tightly allocate vehicles based on capacity, else give adequate vehicles
+            min_veh_target = max(k_cluster, 1 if self.config.fleet_size is not None else 2)
+            fleet_available = min(len(c.customer_nodes), min_veh_target)
             cluster_veh_cfg = VehicleConfig(
                 capacity_weight_kg=self.config.capacity_weight_kg,
                 capacity_volume_m3=self.config.capacity_volume_m3,
@@ -240,9 +254,44 @@ class FeasibilityAwareDecomposition:
                     time_matrix_optimistic=instance.time_matrix_optimistic,
                     time_matrix_pessimistic=instance.time_matrix_pessimistic
                 )
-                fb_sol = NearestNeighborCVRPTW(cluster_veh_cfg).solve(sub_inst, scenario=scenario)
+                # Allow fallback unconstrained fleet if global fleet is unconstrained to prevent dropped orders
+                fb_veh_cfg = VehicleConfig(
+                    capacity_weight_kg=self.config.capacity_weight_kg,
+                    capacity_volume_m3=self.config.capacity_volume_m3,
+                    max_route_duration_min=self.config.max_route_duration_min,
+                    fleet_size=self.config.fleet_size
+                )
+                fb_sol = NearestNeighborCVRPTW(
+                    fb_veh_cfg,
+                    alpha=self.alpha,
+                    beta=self.beta,
+                    gamma=self.gamma
+                ).solve(sub_inst, scenario=scenario)
                 for r in fb_sol.routes:
                     all_routes.append(r.stops)
+
+                # Guarantee complete customer coverage: dispatch an extra vehicle for any remaining unserved orders
+                if fb_sol.unserved_orders:
+                    rem_orders = {n: sub_orders[n] for n in fb_sol.unserved_orders}
+                    rem_inst = DeliveryInstance(
+                        day=instance.day,
+                        num_orders=len(rem_orders),
+                        num_nodes=len(rem_orders) + 1,
+                        depot_id=0,
+                        orders=rem_orders,
+                        distance_matrix=instance.distance_matrix,
+                        time_matrix_mostlikely=instance.time_matrix_mostlikely,
+                        time_matrix_optimistic=instance.time_matrix_optimistic,
+                        time_matrix_pessimistic=instance.time_matrix_pessimistic
+                    )
+                    rem_sol = NearestNeighborCVRPTW(
+                        fb_veh_cfg,
+                        alpha=self.alpha,
+                        beta=self.beta,
+                        gamma=self.gamma
+                    ).solve(rem_inst, scenario=scenario)
+                    for r in rem_sol.routes:
+                        all_routes.append(r.stops)
 
         t_total = time.perf_counter() - t_global_start
 
