@@ -624,7 +624,7 @@ delivery plan remains feasible and reliable when traffic conditions fluctuate.
 % LEFT COLUMN
 \begin{column}{0.48\textwidth}
 
-\textbf{\color{Primary}\small 1. Vehicle Routing (VRPTW)}
+\textbf{\color{Primary}\small 1. Vehicle Routing}
 
 \vspace{0.05cm}
 
@@ -690,6 +690,98 @@ Balance multiple objectives such as travel distance, transit time and service qu
 
 \end{columns}
 \end{frame}
+
+% ------------------------------------------------------------
+% 14. IMPLEMENTED SYSTEM WORKFLOW
+% ------------------------------------------------------------
+
+\begin{frame}{Implemented Decision Support Workflow}
+\sectiontag{User Perspective}
+
+\begin{center}
+
+{\normalsize\bfseries\color{Primary}
+PharmaRoute-Opt Decision Support Workflow
+}
+
+\vspace{0.1cm}
+
+\smalltext{
+An interactive system that allows planners to analyse delivery scenarios
+and evaluate optimisation-based decisions.
+}
+
+\end{center}
+
+\vspace{0.35cm}
+
+\begin{center}
+\begin{tikzpicture}[
+node distance=0.45cm,
+box/.style={
+rounded corners=3pt,
+draw=Accent,
+fill=SoftBlue,
+minimum width=2.0cm,
+minimum height=0.85cm,
+align=center,
+font=\scriptsize
+},
+arr/.style={-{Latex[length=1.5mm]},thick,color=Accent}
+]
+
+\node[box] (a) {Load\\Dataset};
+\node[box,right=of a] (b) {Adjust Sliders\\\& Constraints};
+\node[box,right=of b] (c) {Choose Traffic\\Scenario};
+\node[box,right=of c] (d) {Generate\\Delivery Plan};
+\node[box,right=of d] (e) {Analyse Results\\on GIS Map};
+
+\draw[arr](a)--(b);
+\draw[arr](b)--(c);
+\draw[arr](c)--(d);
+\draw[arr](d)--(e);
+
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.35cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+\begin{column}{0.31\textwidth}
+\textbf{\color{Primary}\small Inputs}
+\footnotesize
+\begin{itemize}
+\item 9 daily delivery instances
+\item Sliders for capacity \& shifts
+\item Traffic multiplier controls
+\end{itemize}
+\end{column}
+
+\begin{column}{0.31\textwidth}
+\textbf{\color{Primary}\small Optimisation}
+\footnotesize
+\begin{itemize}
+\item Real-time heuristic ($<5\text{ ms}$)
+\item Decomposed HiGHS MILP
+\item Feasibility guardrails
+\end{itemize}
+\end{column}
+
+\begin{column}{0.31\textwidth}
+\textbf{\color{Primary}\small Outputs}
+\footnotesize
+\begin{itemize}
+\item Interactive Leaflet GIS routes
+\item Time-window Gantt schedules
+\item Financial and $\text{CO}_2$ telemetry
+\end{itemize}
+\end{column}
+
+\end{columns}
+
+\end{frame}
+
 
 % ------------------------------------------------------------
 % 9. MATHEMATICAL MODEL
@@ -824,7 +916,8 @@ where:
         \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
             {\bfseries\color{Accent}\scriptsize 2. Exact Optimization Per Cluster}\par\vspace{0.02cm}
             \scriptsize
-            Solves each sub-cluster to exact mathematical optimality using the HiGHS branch-and-cut solver within seconds.
+                        Solves each sub-cluster to exact mathematical optimality using \textbf{HiGHS} (state-of-the-art open-source branch-and-cut MILP solver) within seconds.
+
         \end{beamercolorbox}
 
         \vspace{0.12cm}
@@ -1046,7 +1139,7 @@ where:
 
     \begin{column}{0.485\textwidth}
         \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
-            {\bfseries\color{Primary}\small 01. Routing (Answered)}\par\vspace{0.04cm}
+            {\bfseries\color{Primary}\small 01. Routing }\par\vspace{0.04cm}
             \footnotesize
             \begin{itemize}
                 \setlength{\itemsep}{2pt}
@@ -1059,7 +1152,7 @@ where:
         \vspace{0.12cm}
 
         \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
-            {\bfseries\color{Primary}\small 02. Resource Allocation (Answered)}\par\vspace{0.04cm}
+            {\bfseries\color{Primary}\small 02. Resource Allocation }\par\vspace{0.04cm}
             \footnotesize
             \begin{itemize}
                 \setlength{\itemsep}{2pt}
@@ -1072,7 +1165,7 @@ where:
 
     \begin{column}{0.485\textwidth}
         \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
-            {\bfseries\color{Primary}\small 03. Operational Decisions (Answered)}\par\vspace{0.04cm}
+            {\bfseries\color{Primary}\small 03. Operational Decisions }\par\vspace{0.04cm}
             \footnotesize
             \begin{itemize}
                 \setlength{\itemsep}{2pt}
@@ -1105,17 +1198,17 @@ where:
 \begin{frame}{Research Findings: Objectives \& Uncertainty (RQ4, RQ5)}
 \sectiontag{Answers to Trade-Off and Scenario Questions}
 
-\vspace{-0.15cm}
+\vspace{-0.2cm}
 
 \begin{columns}[T,totalwidth=\textwidth]
 
     \begin{column}{0.485\textwidth}
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
-            {\bfseries\color{Primary}\small 04. Multiple Objectives (Answered)}\par\vspace{0.04cm}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
+            {\bfseries\color{Primary}\small 04. Multiple Objectives }\par\vspace{0.02cm}
             \footnotesize
             \textbf{Balancing Distance, Time, and Service Quality:}
             \begin{itemize}
-                \setlength{\itemsep}{2pt}
+                \setlength{\itemsep}{0.5pt}
                 \scriptsize
                 \item \textbf{Distance Priority ($\alpha=0.8$):} Achieves an additional \textbf{$4$--$6\%$ distance reduction}, packing stops tighter to minimize fleet fuel and mileage.
                 \item \textbf{Service Quality Priority ($\gamma \ge 0.6$):} Re-sequences visits by earliest closing deadlines, ensuring \textbf{zero late deliveries}.
@@ -1125,12 +1218,12 @@ where:
     \end{column}
 
     \begin{column}{0.485\textwidth}
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
-            {\bfseries\color{Primary}\small 05. Traffic Uncertainty (Answered)}\par\vspace{0.04cm}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
+            {\bfseries\color{Primary}\small 05. Traffic Uncertainty }\par\vspace{0.02cm}
             \footnotesize
             \textbf{Performance Across Traffic Scenarios:}
             \begin{itemize}
-                \setlength{\itemsep}{2pt}
+                \setlength{\itemsep}{0.5pt}
                 \scriptsize
                 \item \textbf{Optimistic:} Best-case off-peak traffic yields lowest driving duration and highest slack time.
                 \item \textbf{Most Likely:} Realistic baseline representing daily urban driving conditions.
@@ -1141,22 +1234,20 @@ where:
 
 \end{columns}
 
-\vspace{0.2cm}
+\vspace{0.1cm}
 
 \begin{center}
     \begin{tikzpicture}
-        \node[fill=SoftBlue, draw=Line, rounded corners=3pt, font=\scriptsize, inner sep=3.5pt] {
+        \node[fill=SoftBlue, draw=Line, rounded corners=3pt, font=\scriptsize, inner sep=3pt] {
             \textcolor{Dark}{\textbf{Key Finding:}} \quad
             \textcolor{Accent}{$\bullet$}\quad Higher distance weight saves mileage \quad
             \textcolor{Accent}{$\bullet$}\quad Higher SLA weight guarantees punctuality \quad
-            \textcolor{Accent}{$\bullet$}\quad Scenarios quantify operational risk
+            % \textcolor{Accent}{$\bullet$}\quad Scenarios quantify operational risk
         };
     \end{tikzpicture}
 \end{center}
 
-\vfill
 \end{frame}
-
 % ------------------------------------------------------------
 % RESULTS: MULTI-OBJECTIVE PARETO ANALYSIS (RQ4)
 % ------------------------------------------------------------
@@ -1164,32 +1255,54 @@ where:
 \begin{frame}{Results: Multi-Objective Pareto Analysis (RQ4)}
 \sectiontag{Tracing the Trade-Off Frontier}
 
-\vspace{-0.15cm}
+\vspace{-0.2cm}
 
 \begin{columns}[T,totalwidth=\textwidth]
 
-    \begin{column}{0.52\textwidth}
+    % --- LEFT: HERO CHART ---
+    \begin{column}{0.54\textwidth}
         \begin{center}
-            \smartimage[width=\linewidth,height=3.6cm,keepaspectratio]{pareto_frontier_day_01.png}{results/figures/pareto_frontier_day_01.png}{Multi-Objective Pareto Frontier}\par
+            \smartimage[width=\linewidth,height=4.45cm,keepaspectratio]{pareto_frontier_day_01.png}{results/figures/pareto_frontier_day_01.png}{Multi-Objective Pareto Frontier}
+            
             \vspace{0.04cm}
-            \tiny\textcolor{Muted}{Trade-Off Curve: Total Fleet Distance vs. Hospital Lateness}
+            \scriptsize\textcolor{Muted}{\textbf{Figure:} Fleet Distance vs.\ Hospital Lateness (Day 1 Trade-off Frontier)}
         \end{center}
     \end{column}
 
-    \begin{column}{0.46\textwidth}
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
-            \textbf{\color{Primary}\scriptsize Operational Trade-Off Frontier Insights}
-            \vspace{0.03cm}
-            \scriptsize
-            \begin{itemize}
-                \setlength{\itemsep}{1.8pt}
-                \item \textbf{Distance Focus ($\alpha=0.8$):} Minimizes driving mileage (84.3 km), but incurs 22 min of tail-end hospital delays.
-                \item \textbf{Extreme SLA Focus ($\gamma=1.0$):} Eliminates lateness, but distance balloons by \textbf{+80\% (151.9 km)} due to cross-town zigzagging.
-                \item \textbf{Pareto Knee ($\alpha=0.2, \beta=0.2, \gamma=0.6$):} Achieves \textbf{100\% on-time delivery} at only \textbf{86.0 km} (+2.0\% distance over pure minimum).
-            \end{itemize}
-            \vspace{0.05cm}
-            \textcolor{Primary}{\textbf{Takeaway:}} The knee point gives dispatchers the sweet spot: zero late deliveries with negligible (+1.7 km) extra driving.
-        \end{beamercolorbox}
+    % --- RIGHT: STRUCTURED DECISION CARDS ---
+    \begin{column}{0.44\textwidth}
+        {\bfseries\color{Primary}\scriptsize Policy Comparison Across Frontier Points}\par
+        \vspace{0.08cm}
+
+        % Extreme 1: Pure Distance
+        \begin{tikzpicture}
+            \node[fill=CardBg, draw=Line, rounded corners=2.5pt, text width=0.96\linewidth, inner sep=3.5pt] {
+                {\scriptsize\bfseries\color{Dark}1. Min-Distance Extreme ($\alpha=1.0$)}\\[0.03cm]
+                {\tiny\color{Muted}Lowest mileage ($84.3\text{ km}$), but incurs \textbf{22 min clinic lateness} ($93.3\%$ SLA).}
+            };
+        \end{tikzpicture}
+
+        \vspace{0.06cm}
+
+        % Extreme 2: Pure SLA
+        \begin{tikzpicture}
+            \node[fill=CardBg, draw=Line, rounded corners=2.5pt, text width=0.96\linewidth, inner sep=3.5pt] {
+                {\scriptsize\bfseries\color{Dark}2. Zero-Lateness Extreme ($\gamma=1.0$)}\\[0.03cm]
+                {\tiny\color{Muted}Zero delay, but distance balloons by \textbf{+80.2\% ($151.9\text{ km}$)} from cross-city zig-zags.}
+            };
+        \end{tikzpicture}
+
+        \vspace{0.08cm}
+
+        % Winning Decision: Pareto Knee (Highlighted)
+        \begin{tikzpicture}
+            \node[fill=SoftBlue, draw=Accent, line width=0.75pt, rounded corners=3pt, text width=0.96\linewidth, inner sep=4.5pt] {
+                {\scriptsize\bfseries\color{Primary}$\bigstar$ Recommended: Pareto Knee ($\gamma=0.6$)}\\[0.04cm]
+                {\scriptsize\bfseries\color{Accent}100\% On-Time Delivery \quad$\vert$\quad 86.0 km Total}\\[0.05cm]
+                {\tiny\color{Dark}\textbf{Key Finding:} Eliminates \textbf{100\% of hospital delays} for just \textbf{$+1.7\text{ km}$ (+2.0\%)} over the theoretical minimum distance.}
+            };
+        \end{tikzpicture}
+
     \end{column}
 
 \end{columns}
@@ -1225,99 +1338,8 @@ where:
 \vspace{0.05cm}
 
 \begin{center}
-    \scriptsize\textcolor{Primary}{\textbf{Operational Resilience:}} OR routes incorporate temporal slack that prevents cascading route collapse during peak-hour metropolitan Athens gridlock.
+    \scriptsize\textcolor{Primary}{\textbf{Operational Resilience:}} OR routes include extra time to handle peak-hour traffic in Athens and avoid delays across the network.
 \end{center}
-\end{frame}
-
-% ------------------------------------------------------------
-% 14. IMPLEMENTED SYSTEM WORKFLOW
-% ------------------------------------------------------------
-
-\begin{frame}{Implemented Decision Support Workflow}
-\sectiontag{User Perspective}
-
-\begin{center}
-
-{\normalsize\bfseries\color{Primary}
-PharmaRoute-Opt Decision Support Workflow
-}
-
-\vspace{0.1cm}
-
-\smalltext{
-An interactive system that allows planners to analyse delivery scenarios
-and evaluate optimisation-based decisions.
-}
-
-\end{center}
-
-\vspace{0.35cm}
-
-\begin{center}
-\begin{tikzpicture}[
-node distance=0.45cm,
-box/.style={
-rounded corners=3pt,
-draw=Accent,
-fill=SoftBlue,
-minimum width=2.0cm,
-minimum height=0.85cm,
-align=center,
-font=\scriptsize
-},
-arr/.style={-{Latex[length=1.5mm]},thick,color=Accent}
-]
-
-\node[box] (a) {Load\\Dataset};
-\node[box,right=of a] (b) {Adjust Sliders\\\& Constraints};
-\node[box,right=of b] (c) {Choose Traffic\\Scenario};
-\node[box,right=of c] (d) {Generate\\Delivery Plan};
-\node[box,right=of d] (e) {Analyse Results\\on GIS Map};
-
-\draw[arr](a)--(b);
-\draw[arr](b)--(c);
-\draw[arr](c)--(d);
-\draw[arr](d)--(e);
-
-\end{tikzpicture}
-\end{center}
-
-\vspace{0.35cm}
-
-\begin{columns}[T,totalwidth=\textwidth]
-
-\begin{column}{0.31\textwidth}
-\textbf{\color{Primary}\small Inputs}
-\footnotesize
-\begin{itemize}
-\item 9 daily delivery instances
-\item Sliders for capacity \& shifts
-\item Traffic multiplier controls
-\end{itemize}
-\end{column}
-
-\begin{column}{0.31\textwidth}
-\textbf{\color{Primary}\small Optimisation}
-\footnotesize
-\begin{itemize}
-\item Real-time heuristic ($<5\text{ ms}$)
-\item Decomposed HiGHS MILP
-\item Feasibility guardrails
-\end{itemize}
-\end{column}
-
-\begin{column}{0.31\textwidth}
-\textbf{\color{Primary}\small Outputs}
-\footnotesize
-\begin{itemize}
-\item Interactive Leaflet GIS routes
-\item Time-window Gantt schedules
-\item Financial and $\text{CO}_2$ telemetry
-\end{itemize}
-\end{column}
-
-\end{columns}
-
 \end{frame}
 
 % ------------------------------------------------------------
@@ -1444,9 +1466,11 @@ arr/.style={-{Latex[length=1.5mm]},thick,color=Accent}
         \begin{itemize}
             \setlength{\itemsep}{2pt}
             \scriptsize
-            \item \textbf{Vehicle Distance Cost ($c_{\text{dist}}$):} \euro 0.38 per km (EV charging, maintenance, tire wear).
-            \item \textbf{Labor Wage ($c_{\text{labor}}$):} \euro 22.50 per active driver hour.
-            \item \textbf{Total Duty Calculation:} Explicitly combines transit time with clinic unloading drop-offs.
+            \item \textbf{Distance Cost ($c_{\text{dist}}$):} \euro 0.38 per km\\
+            \textit{\textcolor{Muted}{Assumed: e-LCV charging (\euro 0.05) + maintenance/wear (\euro 0.33).}}
+            \item \textbf{Labor Wage ($c_{\text{labor}}$):} \euro 22.50 per active driver hour\\
+            \textit{\textcolor{Muted}{Assumed: Eurostat urban wage (\euro 16) + 30\% employer overhead.}}
+            \item \textbf{Duty Hours:} Transit time plus pharmacy unloading drop-offs.
         \end{itemize}
     \end{column}
 
@@ -1457,20 +1481,27 @@ arr/.style={-{Latex[length=1.5mm]},thick,color=Accent}
         \begin{itemize}
             \setlength{\itemsep}{2pt}
             \scriptsize
-            \item \textbf{Electric Fleet:} $23\text{ g CO}_2/\text{km}$ (clean grid factor).
-            \item \textbf{Diesel Baseline:} $142\text{ g CO}_2/\text{km}$ (standard refrigerated delivery van).
+            \item \textbf{Electric Fleet:} $23\text{ g CO}_2/\text{km}$\\
+            \textit{\textcolor{Muted}{Assumed: Greek clean grid factor ($115\text{ g/kWh} \times 0.20\text{ kWh/km}$).}}
+            \item \textbf{Diesel Baseline:} $142\text{ g CO}_2/\text{km}$\\
+            \textit{\textcolor{Muted}{Assumed: EEA/WLTP refrigerated Euro-6 delivery van standard.}}
         \end{itemize}
 
-        \vspace{0.08cm}
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+        \vspace{0.06cm}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
             {\bfseries\color{Primary}\scriptsize 84\% Decarbonization Impact}\par\vspace{0.02cm}
             \scriptsize
             Avoided Emissions: $0.119\text{ kg CO}_2/\text{km}$ saved.\\
-            Across daily distribution operations, an optimized electric fleet avoids \textbf{over $80\text{ kg of }\text{CO}_2$ per day} compared to conventional diesel distribution.
+            Across daily operations, an optimized electric fleet avoids \textbf{over $80\text{ kg of }\text{CO}_2$ per day} ($>24\text{ tonnes/year}$) vs. conventional diesel.
         \end{beamercolorbox}
     \end{column}
 
 \end{columns}
+
+\vspace{0.08cm}
+\begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3pt]{block body}
+    \tiny\textcolor{Muted}{\textbf{*Data Source Note:} The Zenodo dataset provides physical routing metrics ($d_{ij}, t_{ij}$, weights, volumes). Cost and emission parameters are \textbf{calibrated industry benchmark assumptions} derived from Eurostat labor indices.}
+\end{beamercolorbox}
 
 \vfill
 \end{frame}
@@ -1511,7 +1542,37 @@ From a real-world delivery problem to an OR-based decision-support system.
 \end{frame}
 
 % ------------------------------------------------------------
-% 19. THANK YOU
+% 19. REFERENCES
+% ------------------------------------------------------------
+
+\begin{frame}{References}
+\sectiontag{Academic Literature}
+
+\vspace{-0.1cm}
+
+\setbeamertemplate{bibliography item}[text]
+
+\bibliographystyle{IEEEtran}
+\begin{thebibliography}{00}
+\footnotesize
+\setlength{\itemsep}{5pt}
+
+\bibitem{vrani2025delivering}
+A. Vrani, S. D. Apostolidis, A. C. Kapoutsis, and E. B. Kosmatopoulos, ``Delivering data: A real-world dataset for last-mile delivery optimization,'' \emph{Data in Brief}, vol. 61, p. 111762, 2025.
+
+\bibitem{huang2021highs}
+Q. Huangfu and J. A. J. Hall, ``Parallelizing the dual revised simplex method,'' \emph{Mathematical Programming Computation}, vol. 10, pp. 119--142, 2018.
+
+\bibitem{miller1960integer}
+C. E. Miller, A. W. Tucker, and R. A. Zemlin, ``Integer programming formulation of traveling salesman problems,'' \emph{Journal of the ACM (JACM)}, vol. 7, no. 4, pp. 326--329, 1960.
+
+\end{thebibliography}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 20. THANK YOU
 % ------------------------------------------------------------
 
 \usebackgroundtemplate{%
