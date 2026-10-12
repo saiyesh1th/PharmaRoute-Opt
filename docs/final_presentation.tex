@@ -207,7 +207,7 @@ Yashwanth P T -- CB.SC.U4AIE23164
             \item Operations Research techniques applied
             \item Mathematical model formulation
             \item Why Decomposed MILP (DMILP)?
-            \item Solving strategy: Two-tier engine
+            \item Two-tier engine \& evaluation metrics
         \end{itemize}
 
         \vspace{0.25cm}
@@ -894,6 +894,86 @@ where:
 \end{columns}
 
 \vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% PERFORMANCE EVALUATION METRICS
+% ------------------------------------------------------------
+
+\begin{frame}{Performance Evaluation Metrics}
+\sectiontag{Operational Health}
+
+\setbeamertemplate{itemize item}{\color{Accent}\scriptsize$\bullet$}
+
+\vspace{-0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+    % LEFT COLUMN: EFFICIENCY & RESOURCE UTILISATION
+    \begin{column}{0.485\textwidth}
+
+        {\bfseries\color{Primary}\small 1. Route Efficiency}
+        \par\vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{3pt}
+            \scriptsize
+            \item \textbf{Total Distance ($D$):} $D = \sum_{i,j,k} d_{ij}x_{ijk}$
+            \item \textbf{Total Travel Time ($T$):} Cumulative transit duration
+        \end{itemize}
+
+        \vspace{0.22cm}
+
+        {\bfseries\color{Primary}\small 3. Resource Utilisation}
+        \par\vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{3pt}
+            \scriptsize
+            \item \textbf{Vehicles Used ($V$):} Number of active routes
+            \item \textbf{Capacity Utilisation ($U$):} $U = \frac{\text{Used Cap}}{\text{Total Cap}} \times 100\%$
+        \end{itemize}
+
+    \end{column}
+
+    % RIGHT COLUMN: SERVICE QUALITY & SCENARIO ROBUSTNESS
+    \begin{column}{0.485\textwidth}
+
+        {\bfseries\color{Primary}\small 2. Service Quality}
+        \par\vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{3pt}
+            \scriptsize
+            \item \textbf{On-Time Rate ($OTR$):} $OTR = \frac{N_{\text{on-time}}}{N_{\text{total}}} \times 100\%$
+            \item \textbf{Total Lateness ($L$):} $L = \sum_i \max(0, T_i - l_i)$
+        \end{itemize}
+
+        \vspace{0.22cm}
+
+        {\bfseries\color{Primary}\small 4. Scenario Robustness}
+        \par\vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{3pt}
+            \scriptsize
+            \item \textbf{Degradation ($\Delta P$):} $\Delta P = \frac{P_{\text{pess}} - P_{\text{opt}}}{P_{\text{opt}}} \times 100\%$
+            \item \textbf{Route Stability:} Plan variance across traffic shifts
+        \end{itemize}
+
+    \end{column}
+
+\end{columns}
+
+\vspace{0.2cm}
+
+% --- NOTATION & VARIABLE DEFINITION BOX ---
+\begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
+    {\bfseries\color{Primary}\scriptsize Notation \& Variable Key}\par\vspace{0.03cm}
+    \tiny\color{Dark}
+    $d_{ij}$: distance $(i \to j)$ \quad$\vert$\quad 
+    $x_{ijk}$: binary routing decision \quad$\vert$\quad 
+    $T_i$: arrival time at stop $i$ \quad$\vert$\quad 
+    $l_i$: latest allowed delivery window \quad$\vert$\quad 
+    $P_{\text{opt}}, P_{\text{pess}}$: objective scores under optimistic/pessimistic scenarios
+\end{beamercolorbox}
+
 \end{frame}
 
 % ------------------------------------------------------------
