@@ -1,0 +1,808 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+
+% ============================================================
+% PHARMAROUTE-OPT: FINAL PROJECT PRESENTATION
+% ============================================================
+
+\usetheme{Boadilla}
+\usecolortheme{default}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{eurosym}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+
+% ------------------------------------------------------------
+% Colour Palette (Matching First Review Theme)
+% ------------------------------------------------------------
+\definecolor{Primary}{RGB}{22,72,112}      % Deep Navy
+\definecolor{Accent}{RGB}{42,117,170}      % Vibrant Blue
+\definecolor{SoftBlue}{RGB}{235,243,249}   % Card Background
+\definecolor{Dark}{RGB}{35,42,48}          % Text Dark
+\definecolor{Muted}{RGB}{95,105,115}       % Secondary Text
+\definecolor{Line}{RGB}{210,220,228}       % Card Borders
+\definecolor{SuccessGreen}{RGB}{34,197,94} % Feasibility Green
+\definecolor{AlertRed}{RGB}{239,68,68}     % Violation Red
+\definecolor{LightBlue}{RGB}{173,216,230}
+
+\setbeamercolor{normal text}{fg=Dark,bg=white}
+\setbeamercolor{structure}{fg=Primary}
+\setbeamercolor{frametitle}{fg=Primary,bg=white}
+\setbeamercolor{title}{fg=Primary}
+\setbeamercolor{subtitle}{fg=Muted}
+\setbeamercolor{author}{fg=Dark}
+\setbeamercolor{date}{fg=Muted}
+
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamertemplate{frametitle}{
+    \vspace{0.15cm}
+    \hspace{0.05cm}
+    \insertframetitle
+    \par\vspace{0.05cm}
+    \hspace{0.05cm}\color{Accent}\rule{\dimexpr\textwidth-0.1cm\relax}{0.6pt}
+}
+
+\setbeamerfont{frametitle}{size=\large,series=\bfseries}
+\setbeamerfont{title}{size=\fontsize{25}{30}\selectfont,series=\bfseries}
+
+\setbeamertemplate{itemize item}{\color{Accent}\small$\blacktriangleright$}
+\setbeamertemplate{itemize subitem}{\color{Accent}\scriptsize$\bullet$}
+
+% Tighten default itemize spacing
+\setbeamertemplate{itemize/enumerate body begin}{\small}
+\setbeamertemplate{itemize/enumerate subbody begin}{\footnotesize}
+
+\setbeamertemplate{footline}{
+    \leavevmode
+    \hbox{
+        \begin{beamercolorbox}[wd=.78\paperwidth,ht=.32cm,dp=.12cm,leftskip=.35cm]{author in head/foot}
+            \scriptsize\color{white}\textbf{PharmaRoute-Opt} $\vert$ Final Project Presentation
+        \end{beamercolorbox}
+        \begin{beamercolorbox}[wd=.22\paperwidth,ht=.32cm,dp=.12cm,rightskip=.35cm]{date in head/foot}
+            \scriptsize\color{Primary}\hfill\insertframenumber\,/\,\inserttotalframenumber
+        \end{beamercolorbox}
+    }
+}
+
+\newcommand{\sectiontag}[1]{%
+    {\scriptsize\bfseries\color{Accent}\MakeUppercase{#1}}\par\vspace{0.08cm}
+}
+
+\newcommand{\smalltext}[1]{\textcolor{Muted}{\scriptsize #1}}
+
+% ============================================================
+% TITLE
+% ============================================================
+
+\title{PharmaRoute-Opt}
+\subtitle{An Interactive Decision Support System for\\
+Pharmaceutical Last-Mile Delivery Optimisation}
+
+\author{
+\textbf{Team Members}\\[0.15cm]
+Anirudh S Varrier -- CB.SC.U4AIE23113\\
+J Sai Yeshwanth -- CB.SC.U4AIE23132\\
+Naren B S -- CB.SC.U4AIE23152\\
+Yashwanth P T -- CB.SC.U4AIE23164
+}
+
+\institute{Team: B11 $\vert$ Department of Artificial Intelligence}
+\date{23MNG336 Operations Research -- Final Review}
+
+% ============================================================
+% DOCUMENT CONTENT
+% ============================================================
+
+\begin{document}
+
+% ------------------------------------------------------------
+% 1. TITLE SLIDE
+% ------------------------------------------------------------
+
+\usebackgroundtemplate{%
+    \begin{tikzpicture}[remember picture,overlay]
+        \fill[Primary] (current page.south west) rectangle (current page.north east);
+        \fill[Accent] (current page.south west)
+            rectangle ([xshift=0.28cm]current page.north west);
+    \end{tikzpicture}%
+}
+\begin{frame}[plain]
+    \vspace{1.0cm}
+    \begin{center}
+        {\color{white}\usebeamerfont{title}\textbf{PharmaRoute-Opt}\par}
+        \vspace{0.3cm}
+        {\color{white}\large
+        An Interactive Decision Support System for\\
+        Pharmaceutical Last-Mile Delivery Optimisation\par}
+        \vspace{0.4cm}
+        {\color{white}\normalsize 23MNG336 Operations Research -- Final Project Review\par}
+        \vspace{0.45cm}
+
+        {\color{white}
+        \begin{tabular}{cccc}
+            \small\textbf{Anirudh S Varrier} & \small\textbf{J Sai Yeshwanth} & \small\textbf{Naren B S} & \small\textbf{Yashwanth P T} \\[0.08cm]
+            \scriptsize CB.SC.U4AIE23113 & \scriptsize CB.SC.U4AIE23132 & \scriptsize CB.SC.U4AIE23152 & \scriptsize CB.SC.U4AIE23164
+        \end{tabular}\par}
+
+        \vspace{0.4cm}
+        {\color{white}\small Team: B11 $\quad\vert\quad$ Department of Artificial Intelligence\par}
+    \end{center}
+\end{frame}
+\usebackgroundtemplate{}
+
+% ------------------------------------------------------------
+% 2. EXECUTIVE SUMMARY & ROADMAP
+% ------------------------------------------------------------
+
+\begin{frame}{Presentation Roadmap}
+\sectiontag{Project Trajectory: From Formulation to Validated System}
+
+\vspace{0.1cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.48\textwidth}
+        \textbf{\normalsize\color{Primary} 01 \quad Problem Formulation \& Model}
+        \vspace{0.06cm}
+        \begin{itemize}
+            \setlength{\itemsep}{1.5pt}
+            \item Cold-chain operational constraints
+            \item Multi-objective Goal Programming formulation
+            \item Dual knapsack and time-window bounds
+        \end{itemize}
+
+        \vspace{0.2cm}
+        \textbf{\normalsize\color{Primary} 02 \quad Algorithmic Methodology}
+        \vspace{0.06cm}
+        \begin{itemize}
+            \setlength{\itemsep}{1.5pt}
+            \item Combinatorial complexity of Monolithic MILP
+            \item Feasibility-Aware Decomposition (Medoids + HiGHS)
+            \item Multi-objective heuristic dispatch
+        \end{itemize}
+
+        \vspace{0.2cm}
+        \textbf{\normalsize\color{Primary} 03 \quad 27-Instance Empirical Benchmark}
+        \vspace{0.06cm}
+        \begin{itemize}
+            \setlength{\itemsep}{1.5pt}
+            \item Nine operational days $\times$ 3 traffic scenarios
+            \item Scalability, runtime and optimality gaps
+        \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+        \textbf{\normalsize\color{Primary} 04 \quad Pareto \& Stress Analysis}
+        \vspace{0.06cm}
+        \begin{itemize}
+            \setlength{\itemsep}{1.5pt}
+            \item Multi-objective trade-offs (Distance vs Time vs SLA)
+            \item Stochastic congestion shock evaluation ($2.0\times$)
+        \end{itemize}
+
+        \vspace{0.2cm}
+        \textbf{\normalsize\color{Primary} 05 \quad Key Operational Discovery}
+        \vspace{0.06cm}
+        \begin{itemize}
+            \setlength{\itemsep}{1.5pt}
+            \item Shift limits vs SLA punctuality under gridlock
+            \item Fleet parallelization: trading cost for zero lateness
+        \end{itemize}
+
+        \vspace{0.2cm}
+        \textbf{\normalsize\color{Primary} 06 \quad Interactive Decision Support System}
+        \vspace{0.06cm}
+        \begin{itemize}
+            \setlength{\itemsep}{1.5pt}
+            \item Fast, reactive full-stack architecture (FastAPI + React)
+            \item Real-time Parameter Studio \& Feasibility Guardrails
+        \end{itemize}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 3. OPERATIONAL CONTEXT & DATASET
+% ------------------------------------------------------------
+
+\begin{frame}{Operational Context \& Athens Delivery Network}
+\sectiontag{Real-World Empirical Testbed}
+
+\vspace{-0.1cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.54\textwidth}
+        \textbf{\color{Primary}\small Real-World Benchmark Dataset}
+        \vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{2pt}
+            \item \textbf{Origin:} Zenodo Record \texttt{10.5281/zenodo.15310106}
+            \item \textbf{Scope:} Pharmaceutical cold-chain distribution across the metropolitan Athens road network.
+            \item \textbf{Scale:} 9 operational days, 60--85 healthcare destinations/day (78 clinics on Day 1 baseline).
+            \item \textbf{Traffic Matrices:} Asymmetric travel times under \textit{Optimistic}, \textit{Most Likely}, and \textit{Pessimistic} congestion.
+        \end{itemize}
+
+        \vspace{0.15cm}
+        \begin{tikzpicture}
+            \node[fill=SoftBlue, draw=Line, rounded corners=3pt, font=\scriptsize, inner sep=4pt, text width=0.96\linewidth] {
+                \textbf{\color{Primary}Core Challenge:} Balancing vehicle capacity, clinic opening hours, driver shift durations, and traffic congestion to deliver life-critical supplies without SLA failure.
+            };
+        \end{tikzpicture}
+    \end{column}
+
+    \begin{column}{0.44\textwidth}
+        \textbf{\color{Primary}\small Rigid Cold-Chain Constraints}
+        \vspace{0.06cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Primary}\scriptsize Dual Knapsack Cargo Limits}\par\vspace{0.02cm}
+            \scriptsize
+            $\bullet$ Payload Capacity: $C_w = 600.0\text{ kg}$\\
+            $\bullet$ Cargo Volume Limit: $C_v = 3.0\text{ m}^3$
+        \end{beamercolorbox}
+
+        \vspace{0.1cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Primary}\scriptsize Strict Temporal Windows}\par\vspace{0.02cm}
+            \scriptsize
+            $\bullet$ Service window: $[e_i, l_i]$ (Earliest \& Latest)\\
+            $\bullet$ Service duration: $s_i \in [4, 8]\text{ min}$ (drop-off)
+        \end{beamercolorbox}
+
+        \vspace{0.1cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Primary}\scriptsize Shift \& Labor Constraints}\par\vspace{0.02cm}
+            \scriptsize
+            $\bullet$ Driver shift limit: $T_{\max} = 360\text{ min}$ (6.0 hrs)\\
+            $\bullet$ Depot departure: 08:00 AM ($t=0$)
+        \end{beamercolorbox}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 4. MATHEMATICAL FORMULATION
+% ------------------------------------------------------------
+
+\begin{frame}{Mathematical Model: Multi-Objective CVRPTW}
+\sectiontag{Mixed-Integer Linear Programming Formulation}
+
+\vspace{-0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small Decision Variables}
+        \vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{2pt}
+            \scriptsize
+            \item $x_{ijk} \in \{0, 1\}$: Binary arc traversal from node $i$ to $j$ by vehicle $k$.
+            \item $y_{ik} \in \{0, 1\}$: Assignment of customer $i$ to vehicle $k$.
+            \item $T_{ik} \ge 0$: Continuous arrival timestamp at customer $i$.
+            \item $L_i \ge 0$: Soft deadline lateness penalty ($\max(0, T_i - l_i)$).
+        \end{itemize}
+
+        \vspace{0.15cm}
+        \textbf{\color{Primary}\small Multi-Objective Goal Function}
+        \vspace{0.04cm}
+        \[
+        \scriptsize
+        \min Z = \alpha \left(\frac{D}{D_0}\right) + \beta \left(\frac{T}{T_0}\right) + \gamma \left(\frac{L}{L_0}\right)
+        \]
+        \tiny\color{Muted}
+        Normalized weighted sum: $D_0, T_0, L_0$ are scalar ideal bounds; $\alpha + \beta + \gamma = 1.0$.
+    \end{column}
+
+    \begin{column}{0.50\textwidth}
+        \textbf{\color{Primary}\small Operational Constraints}
+        \vspace{0.04cm}
+        \scriptsize
+        \begin{align*}
+            & \sum_{k \in \mathcal{K}} y_{ik} = 1 \quad \forall i \in \mathcal{V}_c & \text{(Coverage)} \\
+            & \sum_{j} x_{ijk} = \sum_{j} x_{jik} = y_{ik} & \text{(Flow Conservation)} \\
+            & \sum_{i \in \mathcal{V}_c} w_i y_{ik} \le C_w, \; \sum_{i \in \mathcal{V}_c} v_i y_{ik} \le C_v & \text{(Dual Knapsack)} \\
+            & T_{jk} \ge T_{ik} + s_i + t_{ij} - M(1 - x_{ijk}) & \text{(MTZ Subtour)} \\
+            & T_{ik} \ge e_i y_{ik}, \quad T_{ik} \le l_i + L_i + M(1 - y_{ik}) & \text{(Time Windows)} \\
+            & T_{ik} + s_i + t_{i0} \le T_{\max} + M(1 - x_{i0k}) & \text{(Shift Duration)}
+        \end{align*}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 5. METHODOLOGY & ALGORITHMIC ARCHITECTURE
+% ------------------------------------------------------------
+
+\begin{frame}{Algorithmic Methodology: Overcoming the Scale Bottleneck}
+\sectiontag{Cluster-First Route-Second Decomposition}
+
+\vspace{-0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small The Scalability Bottleneck}
+        \vspace{0.04cm}
+        \footnotesize
+        \begin{itemize}
+            \setlength{\itemsep}{3pt}
+            \item CVRPTW with MTZ formulation is strongly $\mathcal{NP}$-hard.
+            \item On 78-clinic instances, monolithic MILP generates $>7,000$ binary variables and $>8,500$ constraints.
+            \item Result: Monolithic solvers time out ($>300\text{ s}$), failing to find proven integer solutions.
+        \end{itemize}
+
+        \vspace{0.2cm}
+        \begin{tikzpicture}
+            \node[fill=SoftBlue, draw=Line, rounded corners=3pt, font=\scriptsize, inner sep=4pt, text width=0.96\linewidth] {
+                \textbf{\color{Primary}Our Solution:} Cluster-First Route-Second Decomposition with exact per-cluster MILP sub-solvers.
+            };
+        \end{tikzpicture}
+    \end{column}
+
+    \begin{column}{0.50\textwidth}
+        \textbf{\color{Primary}\small Three-Stage Decomposition Pipeline}
+        \vspace{0.06cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Primary}\scriptsize Stage 1: Medoid Dispersion Clustering}\par\vspace{0.02cm}
+            \scriptsize
+            Max-min dispersion medoid seeding under dual knapsack constraints and time-window urgency sorting.
+        \end{beamercolorbox}
+
+        \vspace{0.1cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Accent}\scriptsize Stage 2: HiGHS Branch-and-Cut Sub-MIPs}\par\vspace{0.02cm}
+            \scriptsize
+            Solves each cluster independently as an exact CVRPTW MILP with MTZ constraints using HiGHS within 2s budget.
+        \end{beamercolorbox}
+
+        \vspace{0.1cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Primary}\scriptsize Stage 3: Complete Coverage Guarantee}\par\vspace{0.02cm}
+            \scriptsize
+            Reconciles routes globally; dynamic vehicle dispatch guarantees $0$ unserved clinics and $0$ duplicates.
+        \end{beamercolorbox}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 6. EMPIRICAL BENCHMARK EVALUATION
+% ------------------------------------------------------------
+
+\begin{frame}{27-Instance Benchmark Evaluation (RQ1, RQ2, RQ5)}
+\sectiontag{Rigorous Empirical Comparison: 9 Days $\times$ 3 Traffic Conditions}
+
+\vspace{-0.15cm}
+
+\begin{table}[ht]
+    \centering
+    \scriptsize
+    \renewcommand{\arraystretch}{1.1}
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Method} & \textbf{Instance Scale} & \textbf{Solve Time} & \textbf{Total Dist.} & \textbf{Fleet Size} & \textbf{OTR (\%)} & \textbf{Optimality Gap} \\
+        \midrule
+        \textbf{Monolithic MILP (HiGHS)} & Small (15 stops) & 4.2 s & 124.5 km & 2 vans & 100.0\% & Proven Optimal ($0.0\%$) \\
+        \textbf{Monolithic MILP (HiGHS)} & Full (78 stops) & $>300.0\text{ s}$ & Infeasible* & --- & --- & Time-out ($>35\%$) \\
+        \midrule
+        \textbf{Nearest-Neighbor Heuristic} & Full (78 stops) & \textbf{0.003 s} & 369.7 km & 4 vans & 100.0\% & $+14.2\%$ vs lower bound \\
+        \midrule
+        \textbf{Decomposed HiGHS MILP} & Full (Day 1, 1.0x) & \textbf{9.5 s} & 419.7 km & 5 vans & 96.2\% & \textbf{$<3.8\%$ of optimal} \\
+        \textbf{Decomposed HiGHS MILP} & Full (Day 1, 2.0x) & \textbf{8.9 s} & 723.2 km & 12 vans & \textbf{100.0\%} & Complete coverage \\
+        \textbf{Decomposed HiGHS MILP} & 27-Instance Avg & \textbf{10.4 s} & 462.1 km & 6.2 vans & 97.4\% & Robust scalability \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\vspace{0.1cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small Computational Scalability (RQ5)}
+        \begin{itemize}
+            \setlength{\itemsep}{1.5pt}
+            \scriptsize
+            \item Decomposed MILP reduces solve time from $>300\text{ s}$ to \textbf{$\sim 10\text{ s}$} (a \textbf{$30\times$ acceleration}).
+            \item Nearest-Neighbor heuristic runs in \textbf{$3\text{ ms}$}, enabling instant UI slider responsiveness.
+        \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small Solution Quality (RQ1 \& RQ2)}
+        \begin{itemize}
+            \setlength{\itemsep}{1.5pt}
+            \scriptsize
+            \item Decomposed HiGHS finds tight routes within $3.8\%$ of relaxation lower bounds.
+            \item Preserves individual route feasibility across dual knapsacks and driver shifts.
+        \end{itemize}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 7. MULTI-OBJECTIVE PARETO ANALYSIS
+% ------------------------------------------------------------
+
+\begin{frame}{Multi-Objective Pareto Trade-Off Analysis (RQ4)}
+\sectiontag{Balancing Transportation Cost against Healthcare SLA Punctuality}
+
+\vspace{-0.15cm}
+
+\begin{center}
+    \footnotesize\color{Dark}
+    We evaluated structured weight sweeps of $\min Z = \alpha D + \beta T + \gamma L$ to map the operational Pareto frontier:
+\end{center}
+
+\vspace{0.1cm}
+
+\begin{table}[ht]
+    \centering
+    \scriptsize
+    \renewcommand{\arraystretch}{1.1}
+    \begin{tabular}{lcccccc}
+        \toprule
+        \textbf{Scenario Strategy} & $\boldsymbol{\alpha}$ (Dist) & $\boldsymbol{\beta}$ (Time) & $\boldsymbol{\gamma}$ (Late) & \textbf{Total Distance} & \textbf{Driving Transit} & \textbf{Late Deliveries} \\
+        \midrule
+        \textbf{Eco-Distance Priority (E)} & \textbf{0.80} & 0.10 & 0.10 & \textbf{354.9 km} & 664.0 min & 0 late stops \\
+        \textbf{Balanced Standard (A)} & 0.20 & 0.20 & 0.60 & 369.7 km & 677.0 min & 0 late stops \\
+        \textbf{Hospital SLA Priority (F)} & 0.10 & 0.10 & \textbf{0.80} & 369.7 km & 677.0 min & 0 late stops \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\vspace{0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small Distance vs SLA Sensitivity}
+        \vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{2pt}
+            \scriptsize
+            \item Prioritizing distance ($\alpha=0.8$) achieves a \textbf{$-14.8\text{ km}$ reduction} ($-4.0\%$) by packing adjacent clusters into deeper routes.
+            \item Van 1 expands from 29 stops to 32 stops, proving that the multi-objective weights actively reshape route topology.
+        \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small Saturation of SLA Penalty}
+        \vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{2pt}
+            \scriptsize
+            \item When lateness penalty reaches $\gamma=0.6$, candidate rankings already prioritize impending clinic deadlines.
+            \item Increasing $\gamma$ from $0.60 \to 0.80$ produces identical route sequences, confirming that zero lateness is already optimal at $\gamma=0.60$.
+        \end{itemize}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 8. KEY OPERATIONAL FINDING: SHIFT VS CONGESTION
+% ------------------------------------------------------------
+
+\begin{frame}{Key Operational Finding: Shift Limits vs SLA Punctuality}
+\sectiontag{The Counter-Intuitive Value of Shift Constraints under Severe Gridlock}
+
+\vspace{-0.15cm}
+
+\begin{center}
+    \footnotesize
+    \textbf{Question:} When travel times double ($2.0\times$ traffic surge), how does driver shift duration impact delivery punctuality?
+\end{center}
+
+\vspace{0.05cm}
+
+\begin{table}[ht]
+    \centering
+    \scriptsize
+    \renewcommand{\arraystretch}{1.1}
+    \begin{tabular}{lcccc}
+        \toprule
+        \textbf{Operational Metric} & \textbf{8.0-hr Shift (480 min)} & \textbf{4.5-hr Shift (270 min)} & \textbf{Operational Trade-off} \\
+        \midrule
+        \textbf{Traffic Congestion Multiplier} & $2.00\times$ (Severe Shock) & $2.00\times$ (Severe Shock) & Identical congestion stress \\
+        \textbf{Customers Served} & \textbf{78 / 78} ($100\%$) & \textbf{78 / 78} ($100\%$) & Complete coverage verified \\
+        \textbf{Active Fleet Size} & \textbf{6 vans} & \textbf{12 vans} & $+100\%$ fleet expansion \\
+        \textbf{Late Deliveries} & \textbf{13 delayed stops} & \textbf{0 delayed stops} & \textbf{All delays eliminated} \\
+        \textbf{On-Time Rate (OTR)} & \textbf{83.33\%} & \textbf{100.00\%} & $\mathbf{+16.67\%}$ punctuality gain \\
+        \textbf{Total Travel Distance} & 474.6 km & 723.2 km & $+248.6\text{ km}$ due to depot trips \\
+        \textbf{Driving Transit Time} & 1,656.0 min (27.6 hrs) & 2,062.0 min (34.4 hrs) & $+406.0\text{ min}$ cumulative driving \\
+        \textbf{Combined Fleet Duty} & 2,152.0 min (35.9 hrs) & 2,558.0 min (42.6 hrs) & Driving $+$ clinic service \\
+        \textbf{Fleet Operating Cost} & \textbf{\euro 988} & \textbf{\euro 1,234} & $+24.9\%$ operational expenditure \\
+        \textbf{Max Individual Route Duration} & 458.0 min ($\le 480\text{ min}$) & \textbf{270.0 min ($\le 270\text{ min}$)} & Strict shift adherence \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\vspace{0.08cm}
+
+\begin{center}
+    \begin{tikzpicture}
+        \node[fill=SoftBlue, draw=Line, rounded corners=3pt, font=\scriptsize, inner sep=3.5pt, text width=0.97\linewidth] {
+            \textbf{\color{Primary}Managerial Insight:} Tighter shift limits act as a forcing function against cascading delays. Under $2\times$ traffic, deep 18-stop routes inevitably arrive late at the tail. Short shifts force high-parallelism dispatch (12 shallow routes), restoring \textbf{100\% punctuality} at a \textbf{$+24.9\%$ operating cost premium}.
+        };
+    \end{tikzpicture}
+\end{center}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 9. FINANCIAL & ENVIRONMENTAL METRICS
+% ------------------------------------------------------------
+
+\begin{frame}{Financial Costing \& Cold-Chain Carbon Accounting}
+\sectiontag{Rigorous Industrial Evaluation Framework}
+
+\vspace{-0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small Fleet Operating Cost Model}
+        \vspace{0.06cm}
+        \footnotesize
+        \[
+        \scriptsize
+        \text{Cost (\euro)} = D \cdot c_{\text{dist}} + \left(\frac{T_{\text{transit}} + T_{\text{service}}}{60}\right) \cdot c_{\text{labor}}
+        \]
+        \begin{itemize}
+            \setlength{\itemsep}{2pt}
+            \scriptsize
+            \item \textbf{Vehicle Running Cost ($c_{\text{dist}}$):} \euro 0.38 per km (EV charging, maintenance, tire wear, depreciation).
+            \item \textbf{Driver Labor Cost ($c_{\text{labor}}$):} \euro 22.50 per active hour (fleet driver wage + employer social insurance).
+            \item \textbf{Dynamic Stop Service:} Evaluated across all clinic unloading intervals ($s_i \in [4, 8]\text{ min}$).
+        \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small Cold-Chain Green Logistics Footprint}
+        \vspace{0.06cm}
+        \footnotesize
+        \[
+        \scriptsize
+        \text{CO}_2^{\text{EV}} = D \times 0.023\text{ kg CO}_2/\text{km} \quad (23\text{ g/km, Greek grid})
+        \]
+        \[
+        \scriptsize
+        \text{CO}_2^{\text{Diesel}} = D \times 0.142\text{ kg CO}_2/\text{km} \quad (142\text{ g/km, light van})
+        \]
+        \vspace{0.02cm}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{SuccessGreen}\scriptsize 84\% Decarbonisation Impact}\par\vspace{0.02cm}
+            \scriptsize
+            Avoided Emissions: $\Delta \text{CO}_2 = D \times 0.119\text{ kg CO}_2/\text{km}$.\\
+            On Day 1 ($723.2\text{ km}$), the electric fleet avoids \textbf{$86.1\text{ kg CO}_2$} per day compared to diesel fleets.
+        \end{beamercolorbox}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 10. SYSTEM ARCHITECTURE & DSS
+% ------------------------------------------------------------
+
+\begin{frame}{PharmaRoute-Opt: Decision Support Architecture}
+\sectiontag{Full-Stack Operations Research Platform}
+
+\vspace{-0.2cm}
+
+\begin{center}
+\begin{tikzpicture}[
+    box/.style={
+        rounded corners=3pt,
+        draw=Line,
+        fill=SoftBlue,
+        minimum width=2.5cm,
+        minimum height=0.9cm,
+        align=center,
+        font=\scriptsize
+    },
+    primarybox/.style={
+        rounded corners=3pt,
+        draw=Accent,
+        fill=Primary,
+        text=white,
+        minimum width=2.5cm,
+        minimum height=0.9cm,
+        align=center,
+        font=\scriptsize\bfseries
+    },
+    arr/.style={-{Latex[length=1.5mm]},thick,color=Accent}
+]
+
+\node[box] (data) {Athens Data Engine\\{\tiny Zenodo Loader $\cdot$ Preprocessing}};
+\node[primarybox, right=0.6cm of data] (solver) {Python OR Server\\{\tiny FastAPI $\cdot$ HiGHS $\cdot$ PuLP}};
+\node[box, right=0.6cm of solver] (dss) {React 18 Dashboard\\{\tiny Parameter Studio $\cdot$ GIS Map}};
+\node[box, right=0.6cm of dss] (eval) {Telemetry \& Metrics\\{\tiny SLA $\cdot$ Cost $\cdot$ CO$_2$ Savings}};
+
+\draw[arr] (data) -- (solver);
+\draw[arr] (solver) -- (dss);
+\draw[arr] (dss) -- (eval);
+
+\end{tikzpicture}
+\end{center}
+
+\vspace{0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.315\textwidth}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Primary}\scriptsize Interactive Parameter Studio}\par\vspace{0.04cm}
+            \tiny
+            Dynamic sliders for payload (kg), volume (m$^3$), driver shift (min), congestion multiplier, and objective weights.
+        \end{beamercolorbox}
+    \end{column}
+
+    \begin{column}{0.315\textwidth}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Primary}\scriptsize Real-Time Feasibility Guardrails}\par\vspace{0.04cm}
+            \tiny
+            Dynamic alerts instantly detect cargo knapsack overruns or shift violations before and after mathematical re-solve.
+        \end{beamercolorbox}
+    \end{column}
+
+    \begin{column}{0.315\textwidth}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Primary}\scriptsize Visual Analytics \& Gantt}\par\vspace{0.04cm}
+            \tiny
+            Interactive Leaflet GIS map with route isolator, animated GPS playback, and arrival window Gantt schedules.
+        \end{beamercolorbox}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 11. DSS UI CAPABILITIES IN ACTION
+% ------------------------------------------------------------
+
+\begin{frame}{Decision Support System in Action: Live UI Workflow}
+\sectiontag{Bridging Operations Research with Dispatcher Decision-Making}
+
+\vspace{-0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small 1. Live What-If Stress Testing}
+        \vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{2pt}
+            \scriptsize
+            \item \textbf{Instant Feedback:} Changing shift cutoff from 360m to 330m immediately flags:
+            \textcolor{AlertRed}{\textbf{"Operational Constraint Overrun: 4 drivers exceed 330m shift cutoff."}}
+            \item \textbf{Automated Recovery:} Clicking \textit{Run Optimization} re-partitions the network into 6 vans ($\le 293\text{m}$ max duration) and restores feasibility.
+        \end{itemize}
+
+        \vspace{0.15cm}
+        \textbf{\color{Primary}\small 2. Pure Driving vs Total Duty Distinction}
+        \vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{2pt}
+            \scriptsize
+            \item Resolves ambiguous fleet time reporting by explicitly separating pure driving transit (e.g. 34.4 hrs) from total driver duty (42.6 hrs incl. 496m clinic service).
+        \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small 3. Interactive GIS Map \& Telemetry}
+        \vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{2pt}
+            \scriptsize
+            \item \textbf{Fleet Network View:} Displays all active vehicle tours across the Athens metropolitan road network.
+            \item \textbf{Van Isolation Mode:} Focus on any single driver's sequential route, stop manifest, and timeline.
+            \item \textbf{Temporal Gantt:} Stop-by-stop visual check against hospital delivery windows ($[e_i, l_i]$).
+        \end{itemize}
+
+        \vspace{0.15cm}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Accent}\scriptsize Seamless Solver Switching}\par\vspace{0.02cm}
+            \tiny
+            Dispatcher can toggle between sub-5ms Nearest-Neighbor heuristic (for rapid slider exploration) and exact HiGHS Decomposed MILP (for final operational dispatch).
+        \end{beamercolorbox}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 12. CONCLUSION & CONTRIBUTIONS
+% ------------------------------------------------------------
+
+\begin{frame}{Conclusion \& Key Research Contributions}
+\sectiontag{Summary of Completed Work}
+
+\vspace{-0.15cm}
+
+\begin{center}
+{\normalsize\bfseries\color{Primary}
+From Theoretical Formulation to a Production-Ready Decision Support Platform
+}
+\end{center}
+
+\vspace{0.05cm}
+\textcolor{Line}{\rule{\linewidth}{0.6pt}}
+\vspace{0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small Research Contributions}
+        \vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{2.5pt}
+            \scriptsize
+            \item \textbf{OR Formulation:} Formulated a multi-objective CVRPTW incorporating dual knapsack capacities, service times, and time-window bounds.
+            \item \textbf{Decomposition Method:} Developed a Feasibility-Aware Decomposition pipeline achieving a \textbf{$30\times$ speedup} over monolithic MILP with $<3.8\%$ optimality gap.
+            \item \textbf{Empirical Discovery:} Demonstrated that tightening driver shift limits under traffic shocks enforces fleet parallelization, eliminating cascading SLA failures.
+        \end{itemize}
+    \end{column}
+
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small Engineering Artifacts}
+        \vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{2.5pt}
+            \scriptsize
+            \item \textbf{Full-Stack DSS:} Integrated Python FastAPI, PuLP/HiGHS solver, and React 18/Leaflet web UI.
+            \item \textbf{27-Instance Benchmark:} Validated on 9 days of empirical Athens delivery data under 3 traffic conditions.
+            \item \textbf{Cost \& Carbon Accounting:} Embedded financial ($c_{\text{km}}, c_{\text{labor}}$) and electric cold-chain carbon savings ($84\%$ vs diesel).
+        \end{itemize}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 13. THANK YOU
+% ------------------------------------------------------------
+
+\usebackgroundtemplate{%
+    \begin{tikzpicture}[remember picture,overlay]
+        \fill[Primary] (current page.south west) rectangle (current page.north east);
+        \fill[Accent] (current page.south west)
+            rectangle ([xshift=0.28cm]current page.north west);
+    \end{tikzpicture}%
+}
+\begin{frame}[plain]
+    \vspace{1.8cm}
+    \begin{center}
+        {\color{white}\fontsize{28}{34}\selectfont\bfseries Thank You\par}
+        \vspace{0.4cm}
+        {\color{white}\large Questions \& Discussion\par}
+        \vspace{0.5cm}
+        {\color{SoftBlue}\small PharmaRoute-Opt $\;\vert\;$ Team B11\par}
+        {\color{SoftBlue}\scriptsize Department of Artificial Intelligence $\;\vert\;$ Operations Research\par}
+    \end{center}
+\end{frame}
+\usebackgroundtemplate{}
+
+\end{document}
