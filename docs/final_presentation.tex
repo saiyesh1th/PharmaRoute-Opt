@@ -1,7 +1,7 @@
 \documentclass[aspectratio=169,10pt]{beamer}
 
 % ============================================================
-% PHARMAROUTE-OPT: FINAL REVIEW PRESENTATION
+% CLEAN FINAL-REVIEW PRESENTATION: PHARMAROUTE-OPT
 % ============================================================
 
 \usetheme{Boadilla}
@@ -22,12 +22,12 @@
 % ------------------------------------------------------------
 % Colours (Identical to First Review Deck)
 % ------------------------------------------------------------
-\definecolor{Primary}{RGB}{22,72,112}      % Deep Navy
-\definecolor{Accent}{RGB}{42,117,170}      % Vibrant Blue
-\definecolor{SoftBlue}{RGB}{235,243,249}   % Card Background
-\definecolor{Dark}{RGB}{35,42,48}          % Text Dark
-\definecolor{Muted}{RGB}{95,105,115}       % Secondary Text
-\definecolor{Line}{RGB}{210,220,228}       % Card Borders
+\definecolor{Primary}{RGB}{22,72,112}
+\definecolor{Accent}{RGB}{42,117,170}
+\definecolor{SoftBlue}{RGB}{235,243,249}
+\definecolor{Dark}{RGB}{35,42,48}
+\definecolor{Muted}{RGB}{95,105,115}
+\definecolor{Line}{RGB}{210,220,228}
 \definecolor{LightBlue}{RGB}{173,216,230}
 
 \setbeamercolor{normal text}{fg=Dark,bg=white}
@@ -49,7 +49,7 @@
 }
 
 \setbeamerfont{frametitle}{size=\large,series=\bfseries}
-\setbeamerfont{title}{size=\fontsize{25}{30}\selectfont,series=\bfseries}
+\setbeamerfont{title}{size=\fontsize{26}{32}\selectfont,series=\bfseries}
 
 \setbeamertemplate{itemize item}{\color{Accent}\small$\blacktriangleright$}
 \setbeamertemplate{itemize subitem}{\color{Accent}\scriptsize$\bullet$}
@@ -92,17 +92,17 @@ Naren B S -- CB.SC.U4AIE23152\\
 Yashwanth P T -- CB.SC.U4AIE23164
 }
 
-\institute{Team: B11 $\;\vert\;$ Department of Artificial Intelligence}
-\date{23MNG336 Operations Research -- Final Review}
+\institute{Team: B11}
+\date{Operations Research -- Final Review}
 
 % ============================================================
-% DOCUMENT CONTENT
+% DOCUMENT
 % ============================================================
 
 \begin{document}
 
 % ------------------------------------------------------------
-% 1. TITLE SLIDE
+% 1. TITLE
 % ------------------------------------------------------------
 
 \usebackgroundtemplate{%
@@ -113,17 +113,18 @@ Yashwanth P T -- CB.SC.U4AIE23164
     \end{tikzpicture}%
 }
 \begin{frame}[plain]
-    \vspace{1.0cm}
+    \vspace{1.1cm}
     \begin{center}
         {\color{white}\usebeamerfont{title}\textbf{PharmaRoute-Opt}\par}
-        \vspace{0.3cm}
+        \vspace{0.35cm}
         {\color{white}\large
         An Interactive Decision Support System for\\
         Pharmaceutical Last-Mile Delivery Optimisation\par}
-        \vspace{0.4cm}
-        {\color{white}\normalsize 23MNG336 Operations Research -- Final Project Review\par}
+        \vspace{0.45cm}
+        {\color{white}\normalsize 23MNG336 Operations Research -- Final Review\par}
         \vspace{0.45cm}
 
+        % Team Members & Matched Roll Numbers in Align Column Block
         {\color{white}
         \begin{tabular}{cccc}
             \small\textbf{Anirudh S Varrier} & \small\textbf{J Sai Yeshwanth} & \small\textbf{Naren B S} & \small\textbf{Yashwanth P T} \\[0.08cm]
@@ -141,8 +142,9 @@ Yashwanth P T -- CB.SC.U4AIE23164
 % ------------------------------------------------------------
 
 \begin{frame}{Final Review Roadmap}
-\sectiontag{Project Journey \& Outcomes}
+\sectiontag{Project Trajectory \& Presentation Flow}
 
+% Subtle accent dot bullets
 \setbeamertemplate{itemize item}{\color{Accent}\scriptsize$\bullet$}
 
 \vspace{0.1cm}
@@ -151,42 +153,46 @@ Yashwanth P T -- CB.SC.U4AIE23164
     \begin{column}{0.48\textwidth}
         \textbf{\normalsize\color{Primary} 01 \quad Problem \& Dataset Recap}
         \vspace{0.08cm}
+
         \begin{itemize}
             \setlength{\itemsep}{2pt}
             \item Operational challenges addressed
-            \item Athens real-world delivery dataset
+            \item Real-world Athens delivery dataset
             \item The five core research questions
         \end{itemize}
 
         \vspace{0.25cm}
-        \textbf{\normalsize\color{Primary} 02 \quad Methodology \& Modelling}
+        \textbf{\normalsize\color{Primary} 03 \quad Research Findings \& Answers}
         \vspace{0.08cm}
+
         \begin{itemize}
             \setlength{\itemsep}{2pt}
-            \item Operations Research techniques used
-            \item Mathematical model formulation
-            \item Exact vs.\ heuristic solution strategy
+            \item Answers to Research Questions (RQ1--RQ5)
+            \item Multi-objective Pareto trade-offs
+            \item Key discovery: Shift limits under traffic shock
         \end{itemize}
     \end{column}
 
     \begin{column}{0.48\textwidth}
-        \textbf{\normalsize\color{Primary} 03 \quad Answers to Research Questions}
+        \textbf{\normalsize\color{Primary} 02 \quad Implemented Methodology}
         \vspace{0.08cm}
+
         \begin{itemize}
             \setlength{\itemsep}{2pt}
-            \item Routing \& resource allocation findings
-            \item Multi-objective trade-offs (Distance vs.\ SLA)
-            \item Key discovery: Shift limits under traffic shock
+            \item Operations Research techniques applied
+            \item Mathematical model formulation
+            \item Exact vs.\ heuristic solving strategy
         \end{itemize}
 
         \vspace{0.25cm}
         \textbf{\normalsize\color{Primary} 04 \quad Implemented System \& Impact}
         \vspace{0.08cm}
+
         \begin{itemize}
             \setlength{\itemsep}{2pt}
-            \item Interactive Decision Support System (DSS)
-            \item Cost model \& environmental impact
-            \item Tools, technologies and conclusions
+            \item Decision Support System (DSS) in action
+            \item Tools and technologies implemented
+            \item Operational, cost and carbon impact
         \end{itemize}
     \end{column}
 \end{columns}
@@ -195,59 +201,142 @@ Yashwanth P T -- CB.SC.U4AIE23164
 \end{frame}
 
 % ------------------------------------------------------------
-% 3. PROBLEM RECAP
+% 3. PROBLEM STATEMENT
 % ------------------------------------------------------------
 
-\begin{frame}{Problem Context: Pharmaceutical Last-Mile Delivery}
-\sectiontag{The Operational Challenge}
+\begin{frame}{Problem Statement}
+\sectiontag{The Challenge}
 
-\textbf{\color{Primary}\normalsize Delivery Challenges in Healthcare Supply Chains}
+\textbf{\color{Primary}\normalsize Pharmaceutical Last-Mile Delivery}
 
 \vspace{0.05cm}
 \footnotesize
-In pharmaceutical distribution, timely and safe delivery of medications to hospitals and clinics is critical. Deliveries cannot simply be treated as a pure shortest-path problem; they must respect multiple strict physical and operational constraints.
+Pharmaceutical delivery operations involve multiple destinations, shipment
+requirements and time constraints. Efficient planning becomes difficult when
+travel conditions and operational resources vary.
 
-\vspace{0.18cm}
+\vspace{0.15cm}
 
 \begin{columns}[T,totalwidth=\textwidth]
-    \begin{column}{0.50\textwidth}
-        \textbf{\color{Primary}\small Core Operational Constraints}
+    \begin{column}{0.52\textwidth}
+        \textbf{\color{Primary}\small Key operational challenges addressed}
 
         \begin{itemize}
-            \setlength{\itemsep}{1.5pt}
-            \item \textbf{Dual Cargo Limits:} Weight capacity ($600\text{ kg}$) and volume capacity ($3.0\text{ m}^3$) per vehicle.
-            \item \textbf{Clinic Time Windows:} Deliveries must arrive within hospital opening hours.
-            \item \textbf{Unloading Service Times:} Each delivery requires $4$ to $8$ minutes of drop-off time.
-            \item \textbf{Driver Shift Limits:} Drivers cannot exceed maximum allowed shift hours ($6\text{ hours}$ baseline).
-            \item \textbf{Traffic Congestion:} Travel times vary unpredictably across urban roads.
+            \setlength{\itemsep}{0pt}
+            \item Multiple delivery locations and shipment demands
+            \item Weight ($600\text{ kg}$) and volume ($3.0\text{ m}^3$) cargo limits
+            \item Strict hospital time windows and unloading service times
+            \item Driver shift limits ($6\text{ hours}$ baseline cutoff)
+            \item Traffic uncertainty across urban roads
+            \item Balancing route efficiency with delivery service quality
         \end{itemize}
     \end{column}
 
-    \begin{column}{0.47\textwidth}
-        \textbf{\color{Primary}\small What We Aimed to Deliver}
+    \begin{column}{0.45\textwidth}
+        \textbf{\color{Primary}\small Core problem}
 
-        \vspace{0.06cm}
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
-            {\bfseries\color{Primary}\scriptsize Our Goal}\par\vspace{0.03cm}
-            \footnotesize
-            Build a mathematical optimization engine paired with an \textbf{interactive decision-support system} that allows dispatchers to generate feasible delivery routes, evaluate traffic scenarios, and explore operational trade-offs in real time.
-        \end{beamercolorbox}
+        \vspace{0.04cm}
+        \footnotesize
+        How can pharmaceutical deliveries be planned efficiently while
+        satisfying operational constraints?
+
+        \vspace{0.2cm}
+        \textbf{\color{Primary}\small What we built}
+
+        \vspace{0.04cm}
+        \footnotesize
+        An interactive decision-support system using Operations
+        Research to generate, evaluate, and stress-test feasible delivery plans in real time.
     \end{column}
 \end{columns}
-
-\vfill
 \end{frame}
 
 % ------------------------------------------------------------
-% 4. DATASET RECAP
+% 4. SIGNIFICANCE
 % ------------------------------------------------------------
 
-\begin{frame}{Dataset: Real-World Delivery Testbed}
-\sectiontag{Empirical Foundation}
+\begin{frame}{Significance of the Problem}
 
-\vspace{0.05cm}
+\sectiontag{Why This Matters}
 
-% Dataset Title Banner
+\vspace{0.15cm}
+
+\begin{center}
+\footnotesize
+This challenge is critical because effective delivery planning requires simultaneously balancing \textbf{efficiency}, \textbf{service reliability}, \textbf{resource constraints}, and \textbf{traffic uncertainty}.
+\end{center}
+
+\vspace{0.25cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+% ------------------------------------------------------------
+% LEFT COLUMN
+% ------------------------------------------------------------
+
+\begin{column}{0.47\textwidth}
+
+\textbf{\normalsize\color{Primary}Delivery efficiency}
+
+\vspace{0.04cm}
+
+\footnotesize
+Unnecessary distance and travel time increase fleet operating costs
+and vehicle wear required to complete the same set of deliveries.
+
+\vspace{0.25cm}
+
+\textbf{\normalsize\color{Primary}Service reliability}
+
+\vspace{0.04cm}
+
+\footnotesize
+Delivery time windows make route quality more than a distance-minimisation
+problem; life-critical medications must arrive on time.
+
+\end{column}
+
+
+% ------------------------------------------------------------
+% RIGHT COLUMN
+% ------------------------------------------------------------
+
+\begin{column}{0.47\textwidth}
+
+\textbf{\normalsize\color{Primary}Resource utilisation}
+
+\vspace{0.04cm}
+
+\footnotesize
+Delivery requests must be allocated while respecting dual vehicle
+capacities (weight \& volume) and driver shift limits.
+
+\vspace{0.25cm}
+
+\textbf{\normalsize\color{Primary}Traffic uncertainty}
+
+\vspace{0.04cm}
+
+\footnotesize
+Different travel-time scenarios allow us to examine whether a
+delivery plan remains effective and on-time when traffic conditions change.
+
+\end{column}
+
+\end{columns}
+
+\end{frame}
+
+% ------------------------------------------------------------
+% 5. DATASET
+% ------------------------------------------------------------
+
+\begin{frame}{Dataset}
+\sectiontag{Data Source}
+
+\vspace{0.18cm}
+
+% Dataset Title Banner with Accent Left Border
 \begin{tikzpicture}
     \node[
         fill=SoftBlue,
@@ -256,296 +345,188 @@ In pharmaceutical distribution, timely and safe delivery of medications to hospi
         text width=0.965\textwidth
     ] (box) {
         {\bfseries\color{Primary}\normalsize Delivering Data: A Real-World Dataset for Last-Mile Delivery Optimization}\\[0.03cm]
-        {\tiny\color{Muted}Zenodo Open Access Record: 15310106 \quad$\vert$\quad DOI: \texttt{10.5281/zenodo.15310106}}
+        {\tiny\color{Muted}Zenodo Record: 15310106 \quad$\vert$\quad DOI / Record ID: \texttt{10.5281/zenodo.15310106}}
     };
     \fill[Accent, rounded corners=1pt] (box.north west) rectangle ([xshift=2.5pt]box.south west);
 \end{tikzpicture}
 
 \vspace{0.15cm}
 
+% Local clean subtle circular bullets
 \setbeamertemplate{itemize item}{\color{Accent}\scriptsize$\bullet$}
 
+% Two Clean Content Columns
 \begin{columns}[T,totalwidth=\textwidth]
 
     \begin{column}{0.48\textwidth}
-        {\bfseries\color{Primary}\small Dataset Characteristics}
+        {\bfseries\color{Primary}\small Dataset Overview}
         \par\vspace{0.06cm}
         \footnotesize
         \begin{itemize}
             \setlength{\itemsep}{2pt}
-            \item \textbf{Origin:} Real metropolitan pharmaceutical deliveries in Athens, Greece.
-            \item \textbf{9 Daily Instances:} Covering consecutive working days.
-            \item \textbf{Scale:} 60 to 85 destination healthcare clinics per day (78 orders on Day 1).
-            \item \textbf{Complete Data:} Demands (weight \& volume), service durations, and time windows $[e_i, l_i]$.
+            \item Nine daily delivery instances in Athens, Greece
+            \item Approximately 60--85 delivery requests per day (78 on Day 1)
+            \item Real-world pharmaceutical last-mile delivery operations
+            \item Benchmark testbed for vehicle routing research
         \end{itemize}
     \end{column}
 
     \begin{column}{0.48\textwidth}
-        {\bfseries\color{Primary}\small Three Traffic Scenarios Evaluated}
+        {\bfseries\color{Primary}\small Available Data}
         \par\vspace{0.06cm}
         \footnotesize
         \begin{itemize}
-            \setlength{\itemsep}{2pt}
-            \item \textbf{Optimistic:} Best-case off-peak travel times.
-            \item \textbf{Most Likely:} Normal daily urban driving conditions.
-            \item \textbf{Pessimistic:} Heavy peak-hour traffic delays.
-            \item \textbf{Stress Shock:} Simulated up to $2.0\times$ travel-time surges to test plan resilience.
+            \setlength{\itemsep}{1.2pt}
+            \item Order and delivery information
+            \item Shipment weight and volume demands
+            \item Service drop-off times ($4$ to $8\text{ min}$)
+            \item Delivery time windows $[e_i, l_i]$
+            \item Distance and asymmetric travel-time matrices
+            \item Optimistic, Most Likely, and Pessimistic traffic scenarios
         \end{itemize}
     \end{column}
 
 \end{columns}
 
-\vfill
 \end{frame}
 
 % ------------------------------------------------------------
-% 5. RESEARCH QUESTIONS RECAP
+% 6. TRAFFIC SCENARIOS
 % ------------------------------------------------------------
 
-\begin{frame}{Research Questions We Set Out to Answer}
-\sectiontag{Questions Formulated in First Review}
+\begin{frame}{Traffic Scenario Analysis}
+\sectiontag{Dataset Uncertainty Modelling}
 
 \vspace{-0.15cm}
 
+\begin{center}
+    \footnotesize\color{Dark}
+    The delivery network is evaluated under three travel-time conditions to assess how traffic uncertainty impacts routing feasibility and operational performance.
+\end{center}
+
+\vspace{0.15cm}
+
+% --- 3 SCENARIO CARDS ---
 \begin{columns}[T,totalwidth=\textwidth]
 
-    \begin{column}{0.485\textwidth}
-        
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
-            {\bfseries\color{Primary}\scriptsize RQ1. Routing}\par\vspace{0.02cm}
-            \footnotesize How can routes be planned to minimize total travel distance and driving time while satisfying all delivery constraints?
-        \end{beamercolorbox}
-        
-        \vspace{0.12cm}
-        
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
-            {\bfseries\color{Primary}\scriptsize RQ2. Resource Allocation}\par\vspace{0.02cm}
-            \footnotesize How should delivery requests be partitioned among available vehicles without exceeding weight and volume capacities?
-        \end{beamercolorbox}
-        
-        \vspace{0.12cm}
-        
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
-            {\bfseries\color{Primary}\scriptsize RQ3. Operational Decisions}\par\vspace{0.02cm}
-            \footnotesize How many vehicles should be activated dynamically to satisfy daily demand under shift constraints?
-        \end{beamercolorbox}
-
-    \end{column}
-
-    \begin{column}{0.485\textwidth}
-
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
-            {\bfseries\color{Primary}\scriptsize RQ4. Multiple Objectives}\par\vspace{0.02cm}
-            \footnotesize How do we balance trade-offs between travel distance, driver transit time, and customer delivery punctuality?
-        \end{beamercolorbox}
-
-        \vspace{0.18cm}
-
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
-            {\bfseries\color{Primary}\scriptsize RQ5. Uncertainty \& Robustness}\par\vspace{0.02cm}
-            \footnotesize How do delivery plans and on-time service rates respond when traffic congestion significantly worsens?
-        \end{beamercolorbox}
-
-    \end{column}
-
-\end{columns}
-
-\vfill
-\end{frame}
-
-% ------------------------------------------------------------
-% 6. OPERATIONS RESEARCH METHODOLOGY
-% ------------------------------------------------------------
-
-\begin{frame}{Operations Research Methodology: What We Used \& Why}
-\sectiontag{Our Modelling Toolkit}
-
-\vspace{0.05cm}
-
-\begin{columns}[T,totalwidth=\textwidth]
-
-% Left Column
-\begin{column}{0.48\textwidth}
-
-    \textbf{\color{Primary}\small 1. Vehicle Routing with Time Windows (VRPTW)}
-    \vspace{0.03cm}
-    \footnotesize
-    \textbf{Why:} Standard TSP cannot handle multiple vehicles or hospital opening hours.
-    
-    \textcolor{Muted}{\scriptsize
-    \textbf{Role:} Sequences visits for each van while tracking arrival times and ensuring deliveries occur within allowed windows.
-    }
-
-    \vspace{0.22cm}
-
-    \textbf{\color{Primary}\small 2. Dual-Knapsack Assignment}
-    \vspace{0.03cm}
-    \footnotesize
-    \textbf{Why:} Medical orders vary independently in both heaviness and bulk.
-    
-    \textcolor{Muted}{\scriptsize
-    \textbf{Role:} Assigns packages ensuring neither the $600\text{ kg}$ weight limit nor the $3.0\text{ m}^3$ volume limit is violated.
-    }
-
-\end{column}
-
-% Right Column
-\begin{column}{0.48\textwidth}
-
-    \textbf{\color{Primary}\small 3. Mixed-Integer Linear Programming (MILP)}
-    \vspace{0.03cm}
-    \footnotesize
-    \textbf{Why:} Route selection and vehicle dispatch are discrete decisions (0 or 1).
-    
-    \textcolor{Muted}{\scriptsize
-    \textbf{Role:} Formulates exact constraints using binary decision variables and solves sub-clusters using the HiGHS solver.
-    }
-
-    \vspace{0.22cm}
-
-    \textbf{\color{Primary}\small 4. Multi-Objective Goal Programming}
-    \vspace{0.03cm}
-    \footnotesize
-    \textbf{Why:} Distance, driving time, and punctuality often pull in opposing directions.
-    
-    \textcolor{Muted}{\scriptsize
-    \textbf{Role:} Combines normalized objectives using adjustable weights ($\alpha, \beta, \gamma$) so dispatchers can prioritize as needed.
-    }
-
-\end{column}
-
-\end{columns}
-
-\vfill
-\end{frame}
-
-% ------------------------------------------------------------
-% 7. MATHEMATICAL MODEL
-% ------------------------------------------------------------
-
-\begin{frame}{Mathematical Formulation}
-\sectiontag{The Optimisation Model}
-
-\vspace{0.05cm}
-
-\begin{columns}[T,totalwidth=\textwidth]
-
-% LEFT COLUMN
-\begin{column}{0.48\textwidth}
-
-    \textbf{\color{Primary}\small Decision Variables}
-
-    \vspace{0.06cm}
-    \footnotesize
-    \begin{itemize}
-        \setlength{\itemsep}{3pt}
-        \item $x_{ijk} \in \{0, 1\}$: Binary variable $= 1$ if vehicle $k$ travels directly from stop $i$ to stop $j$.
-        \item $y_{ik} \in \{0, 1\}$: Assignment variable $= 1$ if vehicle $k$ serves customer $i$.
-        \item $T_i \ge 0$: Continuous arrival timestamp at customer $i$.
-        \item $L_i \ge 0$: Delivery lateness penalty if arrival occurs after deadline $l_i$.
-    \end{itemize}
-
-\end{column}
-
-% RIGHT COLUMN
-\begin{column}{0.48\textwidth}
-
-    \textbf{\color{Primary}\small Objective Function}
-
-    \vspace{0.04cm}
-    \[
-    \scriptsize
-    \min Z = \alpha \left(\frac{D}{D_0}\right) + \beta \left(\frac{T}{T_0}\right) + \gamma \left(\frac{L}{L_0}\right)
-    \]
-    \vspace{-0.05cm}
-    \scriptsize
-    \begin{itemize}
-        \setlength{\itemsep}{1.5pt}
-        \item $D$ = Total fleet travel distance (km)
-        \item $T$ = Total driving transit time (min)
-        \item $L$ = Total lateness penalty across stops (min)
-        \item $\alpha, \beta, \gamma$ = Priority weights ($\alpha + \beta + \gamma = 1$)
-    \end{itemize}
-
-    \vspace{0.15cm}
-    \textbf{\color{Primary}\small Core Constraints (in plain terms)}
-    \begin{itemize}
-        \setlength{\itemsep}{1.5pt}
+% Card 1: Optimistic
+\begin{column}{0.315\textwidth}
+    \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+        {\bfseries\color{Primary}\scriptsize 01. Optimistic}\par\vspace{0.04cm}
         \scriptsize
-        \item Every hospital is served exactly once.
-        \item Vehicle weight and volume limits are respected.
-        \item Departures and arrivals obey time windows and service drop-off times.
-        \item Total driver time cannot exceed maximum shift limit.
-    \end{itemize}
+        \textbf{Condition:}\\
+        {\footnotesize Best-case travel times}\\[0.08cm]
+        \textbf{Role:}\\
+        {\footnotesize Lower bound delay assessment}
+    \end{beamercolorbox}
+\end{column}
 
+% Card 2: Most Likely
+\begin{column}{0.315\textwidth}
+    \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+        {\bfseries\color{Accent}\scriptsize 02. Most Likely}\par\vspace{0.04cm}
+        \scriptsize
+        \textbf{Condition:}\\
+        {\footnotesize Expected daily traffic}\\[0.08cm]
+        \textbf{Role:}\\
+        {\footnotesize Realistic planning baseline}
+    \end{beamercolorbox}
+\end{column}
+
+% Card 3: Pessimistic
+\begin{column}{0.315\textwidth}
+    \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+        {\bfseries\color{Primary}\scriptsize 03. Pessimistic}\par\vspace{0.04cm}
+        \scriptsize
+        \textbf{Condition:}\\
+        {\footnotesize Heavy peak congestion}\\[0.08cm]
+        \textbf{Role:}\\
+        {\footnotesize Robustness \& stress test}
+    \end{beamercolorbox}
 \end{column}
 
 \end{columns}
 
-\vfill
+\vspace{0.3cm}
+
+% --- BOTTOM EVALUATION METRICS ---
+\begin{center}
+    {\bfseries\scriptsize\color{Primary}Target Evaluation Metrics Across Scenarios}\\[0.12cm]
+    \begin{tikzpicture}
+        \node[fill=SoftBlue, draw=Line, rounded corners=3pt, font=\scriptsize, inner sep=3.5pt] {
+            \textcolor{Dark}{\textbf{Distance}} \quad\textcolor{Accent}{$\bullet$}\quad
+            \textcolor{Dark}{\textbf{Travel Time}} \quad\textcolor{Accent}{$\bullet$}\quad
+            \textcolor{Dark}{\textbf{Routes Used}} \quad\textcolor{Accent}{$\bullet$}\quad
+            \textcolor{Dark}{\textbf{Late Deliveries}}
+        };
+    \end{tikzpicture}
+\end{center}
+
 \end{frame}
 
 % ------------------------------------------------------------
-% 8. SOLVING STRATEGY: EXACT VS HEURISTIC
+% 7. RESEARCH QUESTIONS
 % ------------------------------------------------------------
 
-\begin{frame}{Solving Strategy: Exact vs.\ Heuristic Approaches}
-\sectiontag{Balancing Solution Quality with Practical Speed}
+\begin{frame}{Research Questions}
+\sectiontag{Questions Formulated in the First Review}
 
-\vspace{-0.1cm}
+\vspace{-0.15cm}
 
 \begin{columns}[T,totalwidth=\textwidth]
-    \begin{column}{0.48\textwidth}
-        \textbf{\color{Primary}\small The Scale Challenge}
-        \vspace{0.05cm}
-        \footnotesize
-        \begin{itemize}
-            \setlength{\itemsep}{3pt}
-            \item Monolithic MILP on 78 clinics creates $>7,000$ binary variables and $>8,500$ constraints.
-            \item Standard solvers time out ($>300\text{ seconds}$), making monolithic models unviable for real-time dispatchers.
-        \end{itemize}
 
-        \vspace{0.2cm}
-        \begin{tikzpicture}
-            \node[fill=SoftBlue, draw=Line, rounded corners=3pt, font=\scriptsize, inner sep=4pt, text width=0.96\linewidth] {
-                \textbf{\color{Primary}Our Solution:} A two-tier approach combining a rapid heuristic for instant exploration with a decomposed MILP for optimized dispatch.
-            };
-        \end{tikzpicture}
-    \end{column}
-
-    \begin{column}{0.50\textwidth}
-        \textbf{\color{Primary}\small The Two Solvers Implemented}
-        \vspace{0.06cm}
-
-        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
-            {\bfseries\color{Primary}\scriptsize 1. Fast Multi-Objective Heuristic}\par\vspace{0.02cm}
-            \scriptsize
-            $\bullet$ Nearest-Neighbor with time-window urgency lookahead.\\
-            $\bullet$ \textbf{Speed:} Executes in \textbf{$<5\text{ milliseconds}$}.\\
-            $\bullet$ \textbf{Use case:} Instant feedback as dispatchers move sliders in the UI.
+    % Left Column: Operational & Routing Decisions
+    \begin{column}{0.485\textwidth}
+        
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
+            {\bfseries\color{Primary}\scriptsize 01. Routing}\par\vspace{0.02cm}
+            \footnotesize How can delivery routes be planned to reduce total travel distance and/or travel time while satisfying delivery constraints?
+        \end{beamercolorbox}
+        
+        \vspace{0.15cm}
+        
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
+            {\bfseries\color{Primary}\scriptsize 02. Resource Allocation}\par\vspace{0.02cm}
+            \footnotesize How should delivery requests be allocated to available delivery resources?
+        \end{beamercolorbox}
+        
+        \vspace{0.15cm}
+        
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
+            {\bfseries\color{Primary}\scriptsize 03. Operational Decisions}\par\vspace{0.02cm}
+            \footnotesize Which discrete delivery operations should be activated under the constraints?
         \end{beamercolorbox}
 
-        \vspace{0.12cm}
+    \end{column}
+
+    % Right Column: Trade-offs & Uncertainty
+    \begin{column}{0.485\textwidth}
 
         \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
-            {\bfseries\color{Accent}\scriptsize 2. Feasibility-Aware Decomposed MILP}\par\vspace{0.02cm}
-            \scriptsize
-            $\bullet$ Clusters customers by geographic dispersion \& capacity, then solves each sub-route with the HiGHS MILP solver.\\
-            $\bullet$ \textbf{Speed:} Solves in \textbf{$\sim 9$ to $12\text{ seconds}$}.\\
-            $\bullet$ \textbf{Quality:} Within $3.8\%$ of theoretical lower bounds.
+            {\bfseries\color{Primary}\scriptsize 04. Multiple Objectives}\par\vspace{0.02cm}
+            \footnotesize How should distance, travel time, cost and service quality be balanced?
         \end{beamercolorbox}
+
+        \vspace{0.15cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Primary}\scriptsize 05. Uncertainty}\par\vspace{0.02cm}
+            \footnotesize How does the optimal delivery plan change under different traffic scenarios?
+        \end{beamercolorbox}
+
     \end{column}
+
 \end{columns}
 
 \vfill
 \end{frame}
 
 % ------------------------------------------------------------
-% 9. ANSWERS TO RQ1, RQ2, RQ3
+% 8. RESEARCH FINDINGS: RQ1, RQ2, RQ3
 % ------------------------------------------------------------
 
-\begin{frame}{Answers to Research Questions: Routing \& Allocation}
-\sectiontag{Findings for RQ1, RQ2 and RQ3}
+\begin{frame}{Research Findings: Routing \& Allocation (RQ1, RQ2, RQ3)}
+\sectiontag{Answers to Operational Questions}
 
 \vspace{-0.15cm}
 
@@ -553,44 +534,41 @@ In pharmaceutical distribution, timely and safe delivery of medications to hospi
 
     \begin{column}{0.485\textwidth}
         \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
-            {\bfseries\color{Primary}\small RQ1. Efficient Routing}\par\vspace{0.04cm}
+            {\bfseries\color{Primary}\small 01. Routing (Answered)}\par\vspace{0.04cm}
             \footnotesize
-            \textbf{Result:}
             \begin{itemize}
                 \setlength{\itemsep}{2pt}
                 \scriptsize
-                \item Clustering stops into compact geographical zones reduced overall fleet travel by \textbf{$14.2\%$} compared to uncoordinated routing.
-                \item Total fleet travel distance on Day 1: \textbf{$369.7\text{ km}$} across 78 healthcare deliveries.
-                \item All customer time-window constraints were satisfied without compromising route continuity.
+                \item Clustering stops into compact geographic zones reduced uncoordinated fleet distance by \textbf{$14.2\%$}.
+                \item Day 1 baseline: \textbf{$369.7\text{ km}$} across 78 deliveries with $100\%$ time-window compliance.
+                \item Sequencing ensures tight turnaround with zero route discontinuity.
             \end{itemize}
         \end{beamercolorbox}
 
         \vspace{0.12cm}
 
         \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
-            {\bfseries\color{Primary}\small RQ2. Resource Allocation}\par\vspace{0.04cm}
+            {\bfseries\color{Primary}\small 02. Resource Allocation (Answered)}\par\vspace{0.04cm}
             \footnotesize
-            \textbf{Result:}
             \begin{itemize}
                 \setlength{\itemsep}{2pt}
                 \scriptsize
-                \item Weight ($600\text{ kg}$) and volume ($3.0\text{ m}^3$) constraints were maintained across all routes.
-                \item Average fleet capacity utilization reached \textbf{$78.4\%$}, avoiding under-utilized vehicle runs.
+                \item Dual knapsack constraints strictly maintained: weight ($\le 600\text{ kg}$) and volume ($\le 3.0\text{ m}^3$).
+                \item Achieved \textbf{$78.4\%$ average vehicle capacity utilization}, preventing empty or under-utilized runs.
             \end{itemize}
         \end{beamercolorbox}
     \end{column}
 
     \begin{column}{0.485\textwidth}
         \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
-            {\bfseries\color{Primary}\small RQ3. Operational Decisions}\par\vspace{0.04cm}
+            {\bfseries\color{Primary}\small 03. Operational Decisions (Answered)}\par\vspace{0.04cm}
             \footnotesize
-            \textbf{Result:}
             \begin{itemize}
                 \setlength{\itemsep}{2pt}
                 \scriptsize
-                \item The system dynamically determines the \textbf{minimum viable fleet size} needed to fulfill daily orders without exceeding driver shifts.
-                \item On Day 1 baseline: \textbf{4 vans} fully satisfy demand under normal traffic conditions.
-                \item If shift limits are restricted or traffic increases, the system automatically spins up additional vans to preserve feasibility.
+                \item The solver dynamically determines the \textbf{minimum active fleet size} needed to complete all deliveries within shift limits.
+                \item Baseline conditions activate \textbf{4 vehicles}.
+                \item When shift limits are restricted or traffic surges, the model automatically dispatches additional vehicles to preserve feasibility.
             \end{itemize}
         \end{beamercolorbox}
 
@@ -598,7 +576,7 @@ In pharmaceutical distribution, timely and safe delivery of medications to hospi
         \begin{center}
             \begin{tikzpicture}
                 \node[fill=SoftBlue, draw=Line, rounded corners=3pt, font=\scriptsize, inner sep=3.5pt, text width=0.92\linewidth] {
-                    \textbf{\color{Primary}Key Takeaway:} Delivery requests are partitioned cleanly without human guesswork, satisfying dual knapsacks and driver shifts simultaneously.
+                    \textbf{\color{Primary}Summary:} Deliveries are clustered and assigned mathematically without human guesswork, satisfying knapsack and shift bounds simultaneously.
                 };
             \end{tikzpicture}
         \end{center}
@@ -610,11 +588,11 @@ In pharmaceutical distribution, timely and safe delivery of medications to hospi
 \end{frame}
 
 % ------------------------------------------------------------
-% 10. ANSWERS TO RQ4 & RQ5
+% 9. RESEARCH FINDINGS: RQ4, RQ5
 % ------------------------------------------------------------
 
-\begin{frame}{Answers to Research Questions: Trade-Offs \& Uncertainty}
-\sectiontag{Findings for RQ4 and RQ5}
+\begin{frame}{Research Findings: Objectives \& Uncertainty (RQ4, RQ5)}
+\sectiontag{Answers to Trade-Off and Scenario Questions}
 
 \vspace{-0.15cm}
 
@@ -622,31 +600,31 @@ In pharmaceutical distribution, timely and safe delivery of medications to hospi
 
     \begin{column}{0.485\textwidth}
         \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
-            {\bfseries\color{Primary}\small RQ4. Multi-Objective Trade-Offs}\par\vspace{0.04cm}
+            {\bfseries\color{Primary}\small 04. Multiple Objectives (Answered)}\par\vspace{0.04cm}
             \footnotesize
-            \textbf{What happens when priorities change?}
+            \textbf{Balancing Distance vs.\ Time vs.\ Service Quality:}
             \begin{itemize}
                 \setlength{\itemsep}{2pt}
                 \scriptsize
-                \item \textbf{Distance Priority ($\alpha=0.8$):} Reduces travel distance from $369.7\text{ km}$ to \textbf{$354.9\text{ km}$} ($-4.0\%$), saving fuel at the cost of tighter margins.
-                \item \textbf{Punctuality Priority ($\gamma \ge 0.6$):} Routes are organized strictly around urgent opening times, ensuring \textbf{$0$ late deliveries}.
-                \item Dispatchers can smoothly adjust weights on the UI to see the immediate operational trade-off.
+                \item \textbf{Distance Priority ($\alpha=0.8$):} Achieves a \textbf{$-14.8\text{ km}$ reduction} ($-4.0\%$), shrinking Day 1 distance from $369.7\text{ km}$ to \textbf{$354.9\text{ km}$}.
+                \item \textbf{Service Quality Priority ($\gamma \ge 0.6$):} Re-sequences stops by impending clinic deadlines, achieving \textbf{0 late deliveries}.
+                \item Interactive weights allow planners to trade fuel cost directly against punctuality margins.
             \end{itemize}
         \end{beamercolorbox}
     \end{column}
 
     \begin{column}{0.485\textwidth}
         \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4.5pt]{block body}
-            {\bfseries\color{Primary}\small RQ5. Traffic Uncertainty}\par\vspace{0.04cm}
+            {\bfseries\color{Primary}\small 05. Traffic Uncertainty (Answered)}\par\vspace{0.04cm}
             \footnotesize
-            \textbf{How does traffic impact performance?}
+            \textbf{Performance Across Traffic Scenarios:}
             \begin{itemize}
                 \setlength{\itemsep}{2pt}
                 \scriptsize
-                \item \textbf{Optimistic:} Faster transit, lowest vehicle driving hours ($582\text{ min}$).
-                \item \textbf{Most Likely:} Baseline operational standard ($677\text{ min}$ driving).
-                \item \textbf{Pessimistic:} Driving times increase by $+18.5\%$, but time-window feasibility is maintained without adding extra vans.
-                \item \textbf{Severe Surge ($2.0\times$):} Requires active operational adaptation to prevent cascading delays.
+                \item \textbf{Optimistic:} Best transit ($582\text{ min}$ cumulative driving).
+                \item \textbf{Most Likely:} Baseline operations ($677\text{ min}$ driving).
+                \item \textbf{Pessimistic:} Driving times expand by $+18.5\%$, but time-window feasibility is preserved.
+                \item \textbf{Severe Surge ($2.0\times$):} Stress-testing reveals delay risks, leading to our key operational discovery.
             \end{itemize}
         \end{beamercolorbox}
     \end{column}
@@ -658,10 +636,10 @@ In pharmaceutical distribution, timely and safe delivery of medications to hospi
 \begin{center}
     \begin{tikzpicture}
         \node[fill=SoftBlue, draw=Line, rounded corners=3pt, font=\scriptsize, inner sep=3.5pt] {
-            \textcolor{Dark}{\textbf{Key Insight:}} \quad
-            \textcolor{Accent}{$\bullet$}\quad Higher distance weight saves km \quad
-            \textcolor{Accent}{$\bullet$}\quad Higher SLA weight guarantees on-time arrival \quad
-            \textcolor{Accent}{$\bullet$}\quad Traffic shifts are absorbed cleanly
+            \textcolor{Dark}{\textbf{Key Finding:}} \quad
+            \textcolor{Accent}{$\bullet$}\quad Distance priority saves fuel \quad
+            \textcolor{Accent}{$\bullet$}\quad SLA priority eliminates lateness \quad
+            \textcolor{Accent}{$\bullet$}\quad Scenarios quantify traffic vulnerability
         };
     \end{tikzpicture}
 \end{center}
@@ -670,7 +648,246 @@ In pharmaceutical distribution, timely and safe delivery of medications to hospi
 \end{frame}
 
 % ------------------------------------------------------------
-% 11. KEY OPERATIONAL DISCOVERY
+% 10. IMPLEMENTED OR METHODOLOGY
+% ------------------------------------------------------------
+
+\begin{frame}{Implemented Operations Research Methodology}
+
+\sectiontag{How We Solved the Problem}
+
+\vspace{0.08cm}
+
+\small
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+% ============================================================
+% LEFT COLUMN
+% ============================================================
+
+\begin{column}{0.48\textwidth}
+
+\textbf{\color{Primary}\small 1. Vehicle Routing (VRPTW)}
+
+\vspace{0.05cm}
+
+\footnotesize
+Determines coordinated delivery tours visiting all clinics while satisfying time windows $[e_i, l_i]$.
+
+\vspace{0.04cm}
+
+\textcolor{Muted}{\scriptsize
+\textbf{Implementation:} Routes sequence 78 stops across active vehicles while tracking arrival times and $4$--$8\text{ min}$ service drop-offs.
+}
+
+\vspace{0.22cm}
+
+\textbf{\color{Primary}\small 2. Assignment Optimisation}
+
+\vspace{0.05cm}
+
+\footnotesize
+Assigns orders to vehicles while enforcing dual knapsack capacities.
+
+\vspace{0.04cm}
+
+\textcolor{Muted}{\scriptsize
+\textbf{Implementation:} Ensures neither payload weight ($600\text{ kg}$) nor cargo volume ($3.0\text{ m}^3$) is exceeded on any van.
+}
+
+\end{column}
+
+
+% ============================================================
+% RIGHT COLUMN
+% ============================================================
+
+\begin{column}{0.48\textwidth}
+
+\textbf{\color{Primary}\small 3. Integer Programming (MILP)}
+
+\vspace{0.05cm}
+
+\footnotesize
+Models discrete routing decisions and vehicle activation using binary variables.
+
+\vspace{0.04cm}
+
+\textcolor{Muted}{\scriptsize
+\textbf{Implementation:} Sub-clusters are solved to proven mathematical optimality using the HiGHS branch-and-cut solver.
+}
+
+\vspace{0.22cm}
+
+\textbf{\color{Primary}\small 4. Goal Programming}
+
+\vspace{0.05cm}
+
+\footnotesize
+Balances multiple objectives including travel distance, transit time and lateness penalties.
+
+\vspace{0.04cm}
+
+\textcolor{Muted}{\scriptsize
+\textbf{Implementation:} Normalized objective formulation with user-controlled weights ($\alpha, \beta, \gamma$) in the UI.
+}
+
+\end{column}
+
+\end{columns}
+\end{frame}
+
+% ------------------------------------------------------------
+% 11. MATHEMATICAL MODEL
+% ------------------------------------------------------------
+
+\begin{frame}{Mathematical Model Formulation}
+
+\sectiontag{The Optimisation Model}
+
+\vspace{0.05cm}
+
+\small
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+
+% LEFT COLUMN
+\begin{column}{0.48\textwidth}
+
+\textbf{\color{Primary}\small Decision Variables}
+
+\vspace{0.05cm}
+
+\[
+\scriptsize
+x_{ijk} \in \{0, 1\}
+\]
+\footnotesize
+Binary routing variable: $1$ if vehicle $k$ travels directly from $i$ to $j$; $0$ otherwise.
+
+\vspace{0.05cm}
+
+\[
+\scriptsize
+y_{ik} \in \{0, 1\}
+\]
+\footnotesize
+Assignment variable: $1$ if vehicle $k$ serves customer $i$; $0$ otherwise.
+
+\vspace{0.05cm}
+
+\[
+\scriptsize
+T_i \ge 0, \quad L_i \ge 0
+\]
+\footnotesize
+Arrival time $T_i$ and deadline lateness penalty $L_i = \max(0, T_i - l_i)$.
+
+\end{column}
+
+
+% RIGHT COLUMN
+\begin{column}{0.48\textwidth}
+
+\textbf{\color{Primary}\small Objective Function}
+
+\vspace{0.05cm}
+
+\[
+\scriptsize
+\min Z = \alpha \left(\frac{D}{D_0}\right) + \beta \left(\frac{T}{T_0}\right) + \gamma \left(\frac{L}{L_0}\right)
+\]
+
+\vspace{-0.05cm}
+
+\footnotesize
+where:
+\begin{itemize}
+\setlength\itemsep{1pt}
+\scriptsize
+\item $D$ = Total fleet travel distance (km)
+\item $T$ = Total transit time (min)
+\item $L$ = Total lateness penalty (min)
+\item $\alpha,\beta,\gamma$ = Normalized priority weights
+\end{itemize}
+
+\vspace{0.05cm}
+
+\textbf{\color{Primary}\small Operational Constraints}
+
+\begin{itemize}
+\footnotesize
+\setlength\itemsep{1pt}
+\item Every customer request is served exactly once
+\item Vehicle weight and volume capacities respected
+\item Deliveries occur within customer time windows
+\item Driver total duration does not exceed shift limit
+\end{itemize}
+
+\end{column}
+
+\end{columns}
+
+\end{frame}
+
+% ------------------------------------------------------------
+% 12. SOLVING STRATEGY: EXACT VS HEURISTIC
+% ------------------------------------------------------------
+
+\begin{frame}{Solving Strategy: Exact vs.\ Heuristic Approaches}
+\sectiontag{Balancing Solution Quality with Practical Speed}
+
+\vspace{-0.1cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small The Scalability Challenge}
+        \vspace{0.05cm}
+        \footnotesize
+        \begin{itemize}
+            \setlength{\itemsep}{3pt}
+            \item Formulating all 78 clinics in a single monolithic MILP creates $>7,000$ binary variables and $>8,500$ constraints.
+            \item Monolithic MILP times out ($>300\text{ seconds}$), making it unusable for interactive decision-making.
+        \end{itemize}
+
+        \vspace{0.2cm}
+        \begin{tikzpicture}
+            \node[fill=SoftBlue, draw=Line, rounded corners=3pt, font=\scriptsize, inner sep=4pt, text width=0.96\linewidth] {
+                \textbf{\color{Primary}Our Solution:} A two-tier approach combining an instantaneous heuristic for interactive sliders with a decomposed MILP for optimized dispatch.
+            };
+        \end{tikzpicture}
+    \end{column}
+
+    \begin{column}{0.50\textwidth}
+        \textbf{\color{Primary}\small The Two Implemented Solvers}
+        \vspace{0.06cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Primary}\scriptsize 1. Fast Multi-Objective Heuristic}\par\vspace{0.02cm}
+            \scriptsize
+            $\bullet$ Nearest-Neighbor with time-window urgency lookahead.\\
+            $\bullet$ \textbf{Speed:} Executes in \textbf{$<5\text{ milliseconds}$}.\\
+            $\bullet$ \textbf{Role:} Powers instant feedback as dispatchers drag UI sliders.
+        \end{beamercolorbox}
+
+        \vspace{0.12cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Accent}\scriptsize 2. Feasibility-Aware Decomposed MILP}\par\vspace{0.02cm}
+            \scriptsize
+            $\bullet$ Clusters clinics by geographic dispersion \& capacity, then solves each cluster using the HiGHS MILP solver.\\
+            $\bullet$ \textbf{Speed:} Solves in \textbf{$\sim 9$ to $12\text{ seconds}$}.\\
+            $\bullet$ \textbf{Quality:} Within $3.8\%$ of theoretical lower bounds.
+        \end{beamercolorbox}
+    \end{column}
+\end{columns}
+
+\vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% 13. KEY OPERATIONAL DISCOVERY
 % ------------------------------------------------------------
 
 \begin{frame}{Key Operational Discovery: Shift Limits vs.\ Traffic Shock}
@@ -680,7 +897,7 @@ In pharmaceutical distribution, timely and safe delivery of medications to hospi
 
 \begin{center}
     \footnotesize
-    \textbf{Question:} When city traffic doubles ($2.0\times$ congestion surge), what happens if we tighten the driver shift limit from 8 hours to 4.5 hours?
+    \textbf{Question:} When traffic doubles ($2.0\times$ congestion surge), what happens if we reduce the driver shift limit from 8 hours to 4.5 hours?
 \end{center}
 
 \vspace{0.05cm}
@@ -691,15 +908,15 @@ In pharmaceutical distribution, timely and safe delivery of medications to hospi
     \renewcommand{\arraystretch}{1.12}
     \begin{tabular}{lccc}
         \toprule
-        \textbf{Operational Metric} & \textbf{8.0-Hour Shift (480 min)} & \textbf{4.5-Hour Shift (270 min)} & \textbf{Operational Impact} \\
+        \textbf{Operational Metric} & \textbf{8.0-Hour Shift (480 min)} & \textbf{4.5-Hour Shift (270 min)} & \textbf{Operational Trade-Off} \\
         \midrule
-        \textbf{Traffic Multiplier} & $2.00\times$ (Severe Gridlock) & $2.00\times$ (Severe Gridlock) & Identical traffic condition \\
-        \textbf{Orders Demanded \& Served} & \textbf{78 / 78} ($100\%$) & \textbf{78 / 78} ($100\%$) & All clinics served \\
+        \textbf{Traffic Congestion Multiplier} & $2.00\times$ (Severe Shock) & $2.00\times$ (Severe Shock) & Identical traffic condition \\
+        \textbf{Demanded Orders Served} & \textbf{78 / 78} ($100\%$) & \textbf{78 / 78} ($100\%$) & Complete coverage verified \\
         \textbf{Vans Dispatched} & \textbf{6 vans} & \textbf{12 vans} & Fleet parallelization \\
         \textbf{Late Deliveries} & \textbf{13 delayed stops} & \textbf{0 delayed stops} & \textbf{All delays eliminated!} \\
-        \textbf{On-Time Delivery Rate} & \textbf{83.3\%} & \textbf{100.0\%} & $\mathbf{+16.7\%}$ punctuality boost \\
-        \textbf{Total Fleet Cost} & \textbf{\euro 988} & \textbf{\euro 1,234} & $+24.9\%$ operating expenditure \\
-        \textbf{Max Route Duration} & $458\text{ min}$ ($\le 480\text{ min}$) & $\mathbf{270\text{ min}}$ ($\le 270\text{ min}$) & Respects driver limits \\
+        \textbf{On-Time Delivery Rate (OTR)} & \textbf{83.3\%} & \textbf{100.0\%} & $\mathbf{+16.7\%}$ punctuality gain \\
+        \textbf{Fleet Operating Cost} & \textbf{\euro 988} & \textbf{\euro 1,234} & $+24.9\%$ operational expenditure \\
+        \textbf{Max Individual Route Duration} & $458\text{ min}$ ($\le 480\text{ min}$) & $\mathbf{270\text{ min}}$ ($\le 270\text{ min}$) & Strict shift adherence \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -707,49 +924,58 @@ In pharmaceutical distribution, timely and safe delivery of medications to hospi
 \vspace{0.05cm}
 
 \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
-    {\bfseries\color{Primary}\scriptsize Why does this happen? (Fleet Parallelization)}\par\vspace{0.02cm}
+    {\bfseries\color{Primary}\scriptsize Managerial Insight: Fleet Parallelization}\par\vspace{0.02cm}
     \scriptsize
-    Under heavy traffic, long routes with 15--20 stops suffer from \textbf{cascading delay accumulation}---early traffic jams cause all downstream hospital deliveries to miss their deadlines. By enforcing shorter 4.5-hour shifts, the optimizer is forced to dispatch \textbf{12 shorter, parallel routes} (6--7 stops each), completely eliminating delay propagation and achieving \textbf{100\% on-time delivery} for life-critical medicine.
+    Under heavy traffic, long routes suffer from \textbf{cascading delay accumulation}---early traffic jams cause downstream deliveries to miss their deadlines. Tightening shift limits forces the optimizer to deploy \textbf{12 shorter, parallel routes}, eliminating delay cascades and ensuring \textbf{100\% on-time delivery} for critical medical supplies at a $+24.9\%$ cost premium.
 \end{beamercolorbox}
 
 \vfill
 \end{frame}
 
 % ------------------------------------------------------------
-% 12. DECISION SUPPORT SYSTEM WORKFLOW
+% 14. PROPOSED SOLUTION -> IMPLEMENTED WORKFLOW
 % ------------------------------------------------------------
 
-\begin{frame}{The Implemented Decision Support System (PharmaRoute-Opt)}
-\sectiontag{Interactive User Workflow}
+\begin{frame}{Implemented Decision Support Workflow}
+\sectiontag{User Perspective}
 
 \begin{center}
+
 {\normalsize\bfseries\color{Primary}
-How Planners Interact with PharmaRoute-Opt
+PharmaRoute-Opt Decision Support Workflow
 }
+
+\vspace{0.1cm}
+
+\smalltext{
+An interactive system that allows planners to analyse delivery scenarios
+and evaluate optimisation-based decisions.
+}
+
 \end{center}
 
-\vspace{0.15cm}
+\vspace{0.35cm}
 
 \begin{center}
 \begin{tikzpicture}[
-    node distance=0.45cm,
-    box/.style={
-        rounded corners=3pt,
-        draw=Accent,
-        fill=SoftBlue,
-        minimum width=2.0cm,
-        minimum height=0.85cm,
-        align=center,
-        font=\scriptsize
-    },
-    arr/.style={-{Latex[length=1.5mm]},thick,color=Accent}
+node distance=0.45cm,
+box/.style={
+rounded corners=3pt,
+draw=Accent,
+fill=SoftBlue,
+minimum width=2.0cm,
+minimum height=0.85cm,
+align=center,
+font=\scriptsize
+},
+arr/.style={-{Latex[length=1.5mm]},thick,color=Accent}
 ]
 
-\node[box] (a) {Select Day\\(1 to 9)};
-\node[box,right=of a] (b) {Adjust Sliders\\(Capacities, Shifts)};
-\node[box,right=of b] (c) {Choose Traffic\\\& Priorities};
-\node[box,right=of c] (d) {Run Fast\\Optimization};
-\node[box,right=of d] (e) {Explore Map,\\Gantt \& Metrics};
+\node[box] (a) {Load\\Dataset};
+\node[box,right=of a] (b) {Adjust Sliders\\\& Constraints};
+\node[box,right=of b] (c) {Choose Traffic\\Scenario};
+\node[box,right=of c] (d) {Generate\\Delivery Plan};
+\node[box,right=of d] (e) {Analyse Results\\on GIS Map};
 
 \draw[arr](a)--(b);
 \draw[arr](b)--(c);
@@ -759,93 +985,140 @@ How Planners Interact with PharmaRoute-Opt
 \end{tikzpicture}
 \end{center}
 
-\vspace{0.25cm}
+\vspace{0.35cm}
 
 \begin{columns}[T,totalwidth=\textwidth]
 
-    \begin{column}{0.31\textwidth}
-        \textbf{\color{Primary}\small 1. Parameter Studio}
-        \footnotesize
+\begin{column}{0.31\textwidth}
+\textbf{\color{Primary}\small Inputs}
+\footnotesize
+\begin{itemize}
+\item 9 Athens daily datasets
+\item Sliders for capacity \& shifts
+\item Traffic multiplier ($1\times$ to $2\times$)
+\end{itemize}
+\end{column}
+
+\begin{column}{0.31\textwidth}
+\textbf{\color{Primary}\small Optimisation}
+\footnotesize
+\begin{itemize}
+\item Real-time heuristic ($<5\text{ ms}$)
+\item Decomposed HiGHS MILP
+\item Feasibility guardrails
+\end{itemize}
+\end{column}
+
+\begin{column}{0.31\textwidth}
+\textbf{\color{Primary}\small Outputs}
+\footnotesize
+\begin{itemize}
+\item Interactive Leaflet GIS routes
+\item Time-window Gantt schedules
+\item Cost and $\text{CO}_2$ telemetry
+\end{itemize}
+\end{column}
+
+\end{columns}
+
+\end{frame}
+
+% ------------------------------------------------------------
+% 15. DECISION SUPPORT SYSTEM IN ACTION
+% ------------------------------------------------------------
+
+\begin{frame}{Decision Support System in Action: Live UI Features}
+\sectiontag{Interactive Decision-Making}
+
+\vspace{-0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small 1. Live What-If Stress Testing}
+        \vspace{0.04cm}
         \begin{itemize}
             \setlength{\itemsep}{2pt}
-            \item Vehicle payload ($C_w$)
-            \item Cargo volume ($C_v$)
-            \item Driver shift cutoff ($T_{\max}$)
-            \item Traffic multiplier ($1\times$ to $2\times$)
+            \scriptsize
+            \item \textbf{Real-Time Guardrails:} Changing shift cutoff from 360m to 330m immediately flags:
+            \textcolor{Dark}{\textbf{"Operational Constraint Overrun: 4 drivers exceed 330m shift cutoff."}}
+            \item \textbf{Automated Repair:} Clicking \textit{Run Optimization} re-partitions the network into 6 vans ($\le 293\text{m}$ max duration) and restores feasibility.
+        \end{itemize}
+
+        \vspace{0.15cm}
+        \textbf{\color{Primary}\small 2. Driving Transit vs.\ Total Duty Breakdown}
+        \vspace{0.04cm}
+        \begin{itemize}
+            \setlength{\itemsep}{2pt}
+            \scriptsize
+            \item Explicitly separates pure driving transit from total driver duty (which includes clinic unloading drop-offs), ensuring labor cost transparency.
         \end{itemize}
     \end{column}
 
-    \begin{column}{0.31\textwidth}
-        \textbf{\color{Primary}\small 2. Feasibility Guardrails}
-        \footnotesize
+    \begin{column}{0.48\textwidth}
+        \textbf{\color{Primary}\small 3. Interactive GIS Map \& Telemetry}
+        \vspace{0.04cm}
         \begin{itemize}
             \setlength{\itemsep}{2pt}
-            \item Real-time warning banners
-            \item Detects if shifts are exceeded (e.g., $330\text{ min}$ cutoff)
-            \item Instant automated re-solving to restore feasibility
+            \scriptsize
+            \item \textbf{Fleet Network View:} Displays all active vehicle tours across the Athens metropolitan network.
+            \item \textbf{Van Isolation Mode:} Focus on any single driver's sequential route, stop manifest, and timeline.
+            \item \textbf{Temporal Gantt:} Stop-by-stop visual check against hospital delivery windows.
         \end{itemize}
-    \end{column}
 
-    \begin{column}{0.31\textwidth}
-        \textbf{\color{Primary}\small 3. Visual Analytics}
-        \footnotesize
-        \begin{itemize}
-            \setlength{\itemsep}{2pt}
-            \item Leaflet GIS map with route isolator
-            \item Animated GPS van simulation
-            \item Time-window Gantt schedules
-            \item Cost \& $\text{CO}_2$ telemetry
-        \end{itemize}
+        \vspace{0.15cm}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=4pt]{block body}
+            {\bfseries\color{Accent}\scriptsize Solver Flexibility}\par\vspace{0.02cm}
+            \tiny
+            Dispatchers can explore scenarios instantly with the sub-5ms heuristic and produce final plans with the exact decomposed MILP.
+        \end{beamercolorbox}
     \end{column}
-
 \end{columns}
 
 \vfill
 \end{frame}
 
 % ------------------------------------------------------------
-% 13. TOOLS AND TECHNOLOGIES
+% 16. TOOLS AND TECHNOLOGIES
 % ------------------------------------------------------------
 
-\begin{frame}{Tools \& Technologies: What We Used and Why}
+\begin{frame}{Tools \& Technologies}
 \sectiontag{Implemented Technical Stack}
 
+% Local subtle circle bullet styling
 \setbeamertemplate{itemize item}{\color{Accent}\scriptsize$\bullet$}
 
-\vspace{0.08cm}
+\vspace{0.1cm}
 
 \begin{columns}[T,totalwidth=\textwidth]
 
     % Left Column
     \begin{column}{0.48\textwidth}
-        {\bfseries\color{Primary}\small Backend \& Mathematical Modelling}
-        \par\vspace{0.04cm}
+        {\bfseries\color{Primary}\small Data Processing \& Backend}
+        \par\vspace{0.06cm}
         \footnotesize
-        \begin{itemize}
-            \setlength{\itemsep}{3pt}
-            \item \textbf{Python, Pandas \& NumPy:}\\
-            Processed distance matrices, coordinates, and 9 daily order files from Zenodo.
-            \item \textbf{PuLP \& HiGHS Solver:}\\
-            High-performance linear and integer programming solver used to solve sub-MIPs to optimality.
-            \item \textbf{FastAPI:}\\
-            Lightweight, high-speed asynchronous REST API serving route plans to the UI in milliseconds.
-        \end{itemize}
+        Python, Pandas, NumPy, FastAPI REST server
+
+        \vspace{0.45cm}
+
+        {\bfseries\color{Primary}\small Optimisation}
+        \par\vspace{0.06cm}
+        \footnotesize
+        PuLP, HiGHS MILP solver, Nearest-Neighbor heuristic with urgency lookahead
     \end{column}
 
     % Right Column
     \begin{column}{0.48\textwidth}
-        {\bfseries\color{Primary}\small Frontend \& Visualisation}
-        \par\vspace{0.04cm}
+        {\bfseries\color{Primary}\small Visualisation \& Mapping}
+        \par\vspace{0.06cm}
         \footnotesize
-        \begin{itemize}
-            \setlength{\itemsep}{3pt}
-            \item \textbf{React 18 \& Vite:}\\
-            Modern, responsive user interface with reactive state management for immediate slider response.
-            \item \textbf{Leaflet GIS:}\\
-            Interactive map rendering Athens road trajectories, depot locations, and stop sequences.
-            \item \textbf{Vanilla CSS Design System:}\\
-            Tailored dark/light theme, accessible telemetry cards, and clean visual hierarchy without generic frameworks.
-        \end{itemize}
+        Leaflet GIS, OpenStreetMap, route polyline renderer, temporal Gantt charts
+
+        \vspace{0.45cm}
+
+        {\bfseries\color{Primary}\small Application UI}
+        \par\vspace{0.06cm}
+        \footnotesize
+        React 18, Vite, Vanilla CSS design system with dark/light themes and telemetry cards
     \end{column}
 
 \end{columns}
@@ -854,11 +1127,11 @@ How Planners Interact with PharmaRoute-Opt
 \end{frame}
 
 % ------------------------------------------------------------
-% 14. COSTING & GREEN LOGISTICS
+% 17. COSTING & GREEN LOGISTICS
 % ------------------------------------------------------------
 
-\begin{frame}{Cost Model \& Cold-Chain Carbon Accounting}
-\sectiontag{Practical Business \& Environmental Value}
+\begin{frame}{Operational, Cost \& Environmental Impact}
+\sectiontag{Business \& Sustainability Metrics}
 
 \vspace{-0.15cm}
 
@@ -875,9 +1148,9 @@ How Planners Interact with PharmaRoute-Opt
         \begin{itemize}
             \setlength{\itemsep}{2pt}
             \scriptsize
-            \item \textbf{Distance Cost ($c_{\text{dist}}$):} \euro 0.38 per km (EV charging, tire wear, vehicle maintenance).
+            \item \textbf{Vehicle Cost ($c_{\text{dist}}$):} \euro 0.38 per km (EV charging, maintenance, tire wear).
             \item \textbf{Labor Wage ($c_{\text{labor}}$):} \euro 22.50 per active driver hour.
-            \item \textbf{Total Duty Calculation:} Explicitly accounts for driving transit plus clinic unloading service times ($4$ to $8\text{ min}$ per stop).
+            \item \textbf{Duty Hours:} Explicitly includes driving transit plus clinic unloading service drop-offs.
         \end{itemize}
     \end{column}
 
@@ -888,8 +1161,8 @@ How Planners Interact with PharmaRoute-Opt
         \begin{itemize}
             \setlength{\itemsep}{2pt}
             \scriptsize
-            \item \textbf{Electric Fleet:} $23\text{ g CO}_2/\text{km}$ (Greek electrical grid factor).
-            \item \textbf{Diesel Baseline:} $142\text{ g CO}_2/\text{km}$ (standard refrigerated delivery van).
+            \item \textbf{Electric Fleet:} $23\text{ g CO}_2/\text{km}$ (Greek grid factor).
+            \item \textbf{Diesel Baseline:} $142\text{ g CO}_2/\text{km}$ (standard refrigerated light van).
         \end{itemize}
 
         \vspace{0.08cm}
@@ -897,7 +1170,7 @@ How Planners Interact with PharmaRoute-Opt
             {\bfseries\color{Primary}\scriptsize 84\% Decarbonization Impact}\par\vspace{0.02cm}
             \scriptsize
             Avoided Emissions: $0.119\text{ kg CO}_2/\text{km}$ saved.\\
-            Across Day 1 operations, the optimized electric fleet prevents \textbf{$86.1\text{ kg of }\text{CO}_2$} emissions compared to diesel distribution.
+            On Day 1 operations, the optimized electric fleet avoids \textbf{$86.1\text{ kg of }\text{CO}_2$} emissions compared to diesel distribution.
         \end{beamercolorbox}
     \end{column}
 
@@ -907,19 +1180,20 @@ How Planners Interact with PharmaRoute-Opt
 \end{frame}
 
 % ------------------------------------------------------------
-% 15. CONCLUSION & CONTRIBUTIONS
+% 18. CONCLUSION
 % ------------------------------------------------------------
 
 \begin{frame}{Conclusion}
-\sectiontag{Summary of Achievements}
+\sectiontag{Summary}
 
+% Clean, classic solid circle bullet
 \setbeamertemplate{itemize item}{\color{Accent}\small$\bullet$}
 
 \vspace{-0.1cm}
 
 \begin{center}
 {\normalsize\bfseries\color{Primary}
-From Proposed Plan to a Completed, Validated Decision Support System
+From a real-world delivery problem to an OR-based decision-support system.
 }
 \end{center}
 
@@ -930,18 +1204,18 @@ From Proposed Plan to a Completed, Validated Decision Support System
 \begin{itemize}
     \setlength{\itemsep}{3.5pt}
     \footnotesize
-    \item \textbf{Completed All Objectives:} Successfully transitioned from the planned OR methodology to a fully functional, working decision support system.
-    \item \textbf{Solved Real-World Complexity:} Managed dual knapsack capacities (weight \& volume), time windows, service drop-offs, and driver shift limits on real Athens data.
-    \item \textbf{Answered All 5 Research Questions:} Demonstrated efficient routing ($-14.2\%$ distance), capacity allocation ($78.4\%$ utilization), multi-objective balancing, and robust scenario evaluation.
-    \item \textbf{Discovered Operational Insight:} Proved that tightening driver shifts under gridlock forces fleet parallelization, eliminating delay cascades and ensuring 100\% on-time hospital deliveries.
-    \item \textbf{Delivered Production Tool:} Provided an intuitive UI with interactive sliders, real-time guardrails, Leaflet GIS mapping, and transparent financial/environmental metrics.
+    \item \textbf{Addressed All Challenges:} Handled vehicle routing, dual knapsack capacities, clinic time windows, and traffic uncertainty on real Athens data.
+    \item \textbf{Implemented OR Methodology:} Successfully combined Vehicle Routing, Assignment Optimisation, Integer Programming, and Goal Programming.
+    \item \textbf{Answered All 5 Research Questions:} Demonstrated efficient routing ($-14.2\%$ distance), capacity allocation ($78.4\%$ utilization), multi-objective balancing, and robust scenario performance.
+    \item \textbf{Uncovered Operational Insight:} Proved that tightening driver shifts under severe congestion forces fleet parallelization, eliminating delay cascades and ensuring 100\% on-time delivery.
+    \item \textbf{Delivered Interactive DSS:} Deployed a production-ready application with parameter controls, live feasibility guardrails, Leaflet GIS mapping, and cost/carbon accounting.
 \end{itemize}
 
 \vfill
 \end{frame}
 
 % ------------------------------------------------------------
-% 16. THANK YOU
+% 19. THANK YOU
 % ------------------------------------------------------------
 
 \usebackgroundtemplate{%
@@ -952,7 +1226,7 @@ From Proposed Plan to a Completed, Validated Decision Support System
     \end{tikzpicture}%
 }
 \begin{frame}[plain]
-    \vspace{2.0cm}
+    \vspace{2.1cm}
     \begin{center}
         {\color{white}\fontsize{30}{36}\selectfont\bfseries Thank You\par}
         \vspace{0.35cm}
