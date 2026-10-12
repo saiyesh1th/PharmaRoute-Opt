@@ -28,6 +28,7 @@
 \definecolor{Dark}{RGB}{35,42,48}
 \definecolor{Muted}{RGB}{95,105,115}
 \definecolor{Line}{RGB}{210,220,228}
+\definecolor{CardBg}{RGB}{245,249,252}
 \definecolor{LightBlue}{RGB}{173,216,230}
 
 \setbeamercolor{normal text}{fg=Dark,bg=white}
@@ -75,6 +76,28 @@
 }
 
 \newcommand{\smalltext}[1]{\textcolor{Muted}{\scriptsize #1}}
+
+% ------------------------------------------------------------
+% Overleaf & Local Image Support with Fallback
+% ------------------------------------------------------------
+\graphicspath{{./}{../}{results/figures/}{data/raw/sectors_grouping/}{../results/figures/}{../data/raw/sectors_grouping/}}
+
+\newcommand{\smartimage}[4][]{%
+    \IfFileExists{#2}{%
+        \includegraphics[#1]{#2}%
+    }{%
+        \IfFileExists{#3}{%
+            \includegraphics[#1]{#3}%
+        }{%
+            \begin{tikzpicture}
+                \node[draw=Line, fill=CardBg, rounded corners=3pt, minimum width=3.8cm, minimum height=2.4cm, align=center, inner sep=4pt] {
+                    {\scriptsize\bfseries\color{Primary}#4}\\[0.06cm]
+                    {\tiny\color{Muted}Upload \texttt{\detokenize{#2}} to root}
+                };
+            \end{tikzpicture}%
+        }%
+    }%
+}
 
 % ============================================================
 % TITLE
@@ -158,6 +181,7 @@ Yashwanth P T -- CB.SC.U4AIE23164
             \setlength{\itemsep}{2pt}
             \item Operational challenges addressed
             \item Real-world delivery dataset
+            \item Multi-day dataset structure \& sectorization
             \item The five core research questions
         \end{itemize}
 
@@ -167,8 +191,9 @@ Yashwanth P T -- CB.SC.U4AIE23164
 
         \begin{itemize}
             \setlength{\itemsep}{2pt}
+            \item 27-instance academic benchmark
             \item Routing and resource allocation findings
-            \item Multi-objective Pareto trade-offs
+            \item Multi-objective Pareto trade-offs (RQ4)
             \item Scenario robustness under traffic
         \end{itemize}
     \end{column}
@@ -182,6 +207,7 @@ Yashwanth P T -- CB.SC.U4AIE23164
             \item Operations Research techniques applied
             \item Mathematical model formulation
             \item Why Decomposed MILP (DMILP)?
+            \item Solving strategy: Two-tier engine
         \end{itemize}
 
         \vspace{0.25cm}
@@ -388,6 +414,59 @@ delivery plan remains feasible and reliable when traffic conditions fluctuate.
 
 \end{columns}
 
+\end{frame}
+
+% ------------------------------------------------------------
+% DATASET STRUCTURE & GEOGRAPHIC DISTRIBUTION (SLIDE 2 OF 2)
+% ------------------------------------------------------------
+
+\begin{frame}{Dataset Structure \& Geographic Distribution}
+\sectiontag{Multi-Day Instance Statistics}
+
+\vspace{-0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+    \begin{column}{0.54\textwidth}
+        \footnotesize\textbf{\color{Primary}Multi-Day Instance Statistics}
+        \vspace{0.05cm}
+        \resizebox{\linewidth}{!}{%
+        \renewcommand{\arraystretch}{1.12}
+        \begin{tabular}{@{}c c c c c c c@{}}
+        \toprule
+        \textbf{Day} & \textbf{Orders} & \textbf{Weight (kg)} & \textbf{Volume ($\text{m}^3$)} & \textbf{Avg $s_i$ (min)} & \textbf{LAT $\le 180$ (Urgent)} & \textbf{LAT $\le 300$} \\
+        \midrule
+        \textbf{Day 1} & 78 & 1,880.5 & 9.020 & 6.36 & 15 & 62 \\
+        \textbf{Day 2} & 63 & 1,394.6 & 5.228 & 6.48 & 15 & 47 \\
+        \textbf{Day 3} & 67 & 687.6   & 4.054 & 5.73 & 11 & 55 \\
+        \textbf{Day 4} & 69 & 1,689.4 & 4.758 & 6.20 & 18 & 50 \\
+        \textbf{Day 5} & 75 & 1,270.2 & 4.449 & 6.35 & 17 & 57 \\
+        \textbf{Day 6} & 77 & 1,301.4 & 4.592 & 6.03 & 16 & 60 \\
+        \textbf{Day 7} & 66 & 1,034.6 & 3.693 & 5.94 & 14 & 51 \\
+        \textbf{Day 8} & 74 & 1,095.4 & 3.213 & 5.89 & 15 & 58 \\
+        \textbf{Day 9} & 84 & 1,301.5 & 5.316 & 6.86 & 25 & 58 \\
+        \midrule
+        \textbf{Total} & \textbf{653} & \textbf{11,655.2} & \textbf{44.323} & \textbf{6.20} & \textbf{146} & \textbf{498} \\
+        \bottomrule
+        \end{tabular}%
+        }
+
+        \vspace{0.12cm}
+        \scriptsize
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3pt]{block body}
+            \textbf{\color{Primary}Observation:} Volume is frequently the binding constraint rather than weight (e.g., Day 1 has $9.02\text{ m}^3$ requiring $\ge 4$ vans).
+        \end{beamercolorbox}
+    \end{column}
+
+    \begin{column}{0.44\textwidth}
+        \begin{center}
+            \smartimage[height=4.4cm,keepaspectratio]{Day1.jpg}{data/raw/sectors_grouping/Day1.jpg}{Attica Sectorization Map}\par
+            \tiny\textcolor{Muted}{Attica Metropolitan Sectorization (Day 1: 78 Stops)\newline
+            Central (47), West (21), North (9), East (1)}
+        \end{center}
+    \end{column}
+
+\end{columns}
 \end{frame}
 
 % ------------------------------------------------------------
@@ -811,6 +890,63 @@ where:
 \end{frame}
 
 % ------------------------------------------------------------
+% RESULTS: 27-INSTANCE ACADEMIC BENCHMARK
+% ------------------------------------------------------------
+
+\begin{frame}{Results: 27-Instance Academic Benchmark}
+\sectiontag{Macro Benchmark Evaluation}
+
+\vspace{-0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+    \begin{column}{0.53\textwidth}
+        \resizebox{\linewidth}{!}{%
+        \renewcommand{\arraystretch}{1.10}
+        \begin{tabular}{@{}l c c c c c@{}}
+        \toprule
+        \textbf{Day (ML Traffic)} & \textbf{Orders} & \textbf{Greedy OTR} & \textbf{Decomp OTR} & \textbf{$\Delta$ Delayed} & \textbf{Solve Time} \\
+        \midrule
+        Day 1 & 78 & 96.15\% & \textbf{98.72\%} & -2 stops & 51.09s \\
+        Day 2 & 63 & 93.65\% & \textbf{98.41\%} & -3 stops & 40.38s \\
+        Day 3 & 67 & 97.01\% & \textbf{100.0\%} & -2 stops & 40.55s \\
+        Day 4 & 69 & 92.75\% & \textbf{100.0\%} & -5 stops & 40.80s \\
+        Day 5 & 75 & 92.00\% & \textbf{100.0\%} & -6 stops & 50.41s \\
+        Day 6 & 77 & 88.31\% & \textbf{96.10\%} & -6 stops & 50.42s \\
+        Day 7 & 66 & 92.42\% & \textbf{96.97\%} & -3 stops & 40.66s \\
+        Day 8 & 74 & 93.24\% & \textbf{97.30\%} & -3 stops & 50.39s \\
+        Day 9 & 84 & 91.67\% & \textbf{94.05\%} & -2 stops & 50.91s \\
+        \midrule
+        \textbf{27-Instance Avg} & \textbf{72.5} & \textbf{94.07\%} & \textbf{97.58\%} & \textbf{-58.9\% late} & \textbf{46.17s} \\
+        \bottomrule
+        \end{tabular}%
+        }
+
+        \vspace{0.10cm}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3pt]{block body}
+            \tiny\textbf{\color{Primary}Scalability Limit:} Monolithic MILP solves $n \le 20$ in 30s, but has a 60.9\% gap at $n=25$ and yields \textbf{no feasible integer solution} at $n \ge 40$ within 120s limit. Decomposition solves Day 1 (78 nodes) in 51s.
+        \end{beamercolorbox}
+    \end{column}
+
+    \begin{column}{0.44\textwidth}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3.5pt]{block body}
+            \textbf{\color{Primary}\scriptsize Key Benchmark Outcomes}
+            \vspace{0.03cm}
+            \scriptsize
+            \begin{itemize}
+                \setlength{\itemsep}{2pt}
+                \item \textbf{Significant Punctuality Advantage:} Decomposed MILP achieves \textbf{97.58\% average on-time delivery} across all 27 instances vs 94.07\% for Greedy baseline.
+                \item \textbf{58.9\% Lateness Reduction:} Cuts delayed deliveries from \textbf{117 down to 48} across 1,938 patient clinic orders.
+                \item \textbf{Perfect SLA Compliance:} Achieves 100\% on-time delivery on Days 3, 4, and 5.
+                \item \textbf{Operational Tractability:} Average runtime of \textbf{46.17 seconds} easily fits morning logistics dispatch windows.
+            \end{itemize}
+        \end{beamercolorbox}
+    \end{column}
+
+\end{columns}
+\end{frame}
+
+% ------------------------------------------------------------
 % 12. RESEARCH FINDINGS: RQ1, RQ2, RQ3
 % ------------------------------------------------------------
 
@@ -932,6 +1068,49 @@ where:
 \end{center}
 
 \vfill
+\end{frame}
+
+% ------------------------------------------------------------
+% RESULTS: MULTI-OBJECTIVE PARETO ANALYSIS (RQ4)
+% ------------------------------------------------------------
+
+\begin{frame}{Results: Multi-Objective Pareto Analysis (RQ4)}
+\sectiontag{Pareto Trade-Offs}
+
+\vspace{-0.15cm}
+
+\begin{columns}[T,totalwidth=\textwidth]
+
+    \begin{column}{0.58\textwidth}
+        \begin{center}
+            \vspace{-0.10cm}
+            \smartimage[width=\linewidth,height=4.85cm,keepaspectratio]{pareto_frontier_day_01.png}{results/figures/pareto_frontier_day_01.png}{Multi-Objective Pareto Frontier}\par
+            \vspace{0.02cm}
+            \tiny\textcolor{Muted}{Multi-Objective Pareto Trade-Off \& Sensitivity Analysis (Day 1)}
+        \end{center}
+    \end{column}
+
+    \begin{column}{0.40\textwidth}
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=3pt]{block body}
+            \textbf{\color{Primary}\scriptsize Non-Dominated Frontier Insights}
+            \vspace{0.02cm}
+            \scriptsize
+            \begin{itemize}
+                \setlength{\itemsep}{1.2pt}
+                \item \textbf{Pure Distance ($\alpha=1.0$):} Minimizes distance (84.3 km), but incurs \textbf{22 min clinic lateness} (93.3\% on-time).
+                \item \textbf{Pure Punctuality ($\gamma=1.0$):} Eliminates lateness, but distance balloons by \textbf{+80.2\% (151.9 km)} due to zigzagging between urgent deadlines.
+                \item \textbf{Pareto Knee ($\alpha=0.2, \beta=0.2, \gamma=0.6$):} Achieves \textbf{100\% on-time delivery (0 lateness)} at only \textbf{86.0 km} (+2.0\% distance over pure minimum).
+            \end{itemize}
+        \end{beamercolorbox}
+
+        \vspace{0.06cm}
+
+        \begin{beamercolorbox}[rounded=true,shadow=false,wd=\linewidth,sep=2.5pt]{block body}
+            \scriptsize\textbf{\color{Primary}Decision Insight:} Dispatchers operating near the $\gamma=0.6$ knee point eliminate all patient delays for only $+1.7\text{ km}$ added driving.
+        \end{beamercolorbox}
+    \end{column}
+
+\end{columns}
 \end{frame}
 
 % ------------------------------------------------------------
