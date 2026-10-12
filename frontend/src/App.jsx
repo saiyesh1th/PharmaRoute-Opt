@@ -51,6 +51,41 @@ const DEFAULT_PARAMS = {
   trafficMultiplier: 1.0 // 1.0x baseline
 };
 
+function formatMinuteToClock(min) {
+  const totMin = Math.round(min || 0);
+  const hour = 8 + Math.floor(totMin / 60);
+  const m = totMin % 60;
+  const period = hour >= 12 ? 'PM' : 'AM';
+  const displayHour = hour > 12 ? hour - 12 : (hour === 0 ? 12 : hour);
+  return `${displayHour.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${period}`;
+}
+
+function getRouteArrivalTimes(route, dayMatrix, scenario, trafficMultiplier = 1.0, dayOrders = {}) {
+  if (!route || !route.length || !dayMatrix) return [];
+  const timeKey = 'time_' + scenario;
+  const timeMat = dayMatrix[timeKey] || dayMatrix.time_mostlikely || [];
+  const times = [];
+  let currTime = 0;
+  let prevNode = 0;
+
+  route.forEach((node, idx) => {
+    if (idx === 0) {
+      times.push(0);
+      prevNode = 0;
+      return;
+    }
+    const transit = ((timeMat[prevNode]?.[node] ?? 12) * trafficMultiplier);
+    const ord = dayOrders[String(node)] || {};
+    const eat = ord.eat ?? 0;
+    const service = ord.service_time ?? 6;
+    const arrTime = Math.max(currTime + transit, eat);
+    times.push(Math.round(arrTime));
+    currTime = arrTime + service;
+    prevNode = node;
+  });
+  return times;
+}
+
 export default function App() {
   // Navigation Tabs: 'dispatch', 'studio', 'gantt', 'benchmark', 'robustness'
   const [activeTab, setActiveTab] = useState('dispatch');
@@ -656,6 +691,7 @@ export default function App() {
 
         // Add Numbered Sequential Pins (skip other vans when one van is hovered to avoid pin clutter)
         if (!hasAnyHover || isHovered) {
+          const routeArrTimes = getRouteArrivalTimes(route, dayMatrix, scenario, simParams.trafficMultiplier, dayOrders);
           let seq = 1;
           route.forEach((node, nodeIdx) => {
             if (node === 0) return;
@@ -664,6 +700,10 @@ export default function App() {
             if (!c) return;
 
             const pinNumber = seq++;
+            const arrMin = routeArrTimes[nodeIdx] || 0;
+            const etaClock = formatMinuteToClock(arrMin);
+            const isLate = ord.lat && arrMin > ord.lat;
+
             const customPinIcon = L.divIcon({
               className: 'custom-pin-container',
               html: `<div class="stop-marker-pin" style="--pin-color: ${vColor}"><span>${pinNumber}</span></div>`,
@@ -683,7 +723,7 @@ export default function App() {
                 <div class="popup-med-type">📦 ${c.type || 'Vaccines & Cold-Chain'}</div>
                 <div class="popup-grid">
                   <div><span class="popup-label">Time Window</span><div class="popup-val">[${ord.eat || 0} - ${ord.lat || 0}] min</div></div>
-                  <div><span class="popup-label">Scheduled ETA</span><div class="popup-val text-emerald">09:${(nodeIdx * 14 + 10).toString().padStart(2, '0')} AM</div></div>
+                  <div><span class="popup-label">Scheduled ETA</span><div class="popup-val" style="color: ${isLate ? '#fb7185' : '#34d399'}">${etaClock} (+${arrMin}m)</div></div>
                   <div><span class="popup-label">Payload</span><div class="popup-val">${ord.weight || 0} kg • ${ord.volume || 0} m³</div></div>
                   <div><span class="popup-label">Service</span><div class="popup-val">${ord.service_time || 0} min</div></div>
                 </div>
@@ -740,7 +780,7 @@ export default function App() {
       map.fitBounds(L.latLngBounds(allBounds), { padding: [40, 40] });
     }
 
-  }, [day, scenario, engine, safeSelectedVehicle, showBackgroundRoutes, routes, coordsMap, coordsList, dayOrders, activeMarkerNode, hoveredVehicle]);
+  }, [day, scenario, engine, safeSelectedVehicle, showBackgroundRoutes, routes, coordsMap, coordsList, dayOrders, activeMarkerNode, hoveredVehicle, dayMatrix, simParams.trafficMultiplier]);
 
   // Live Vehicle Simulation on Leaflet Map (Supports both Individual Van and All Vans Fleet Simulation)
   useEffect(() => {
@@ -842,9 +882,9 @@ export default function App() {
     if (safeSelectedVehicle === null || !routes[safeSelectedVehicle]) return [];
     const r = routes[safeSelectedVehicle];
     let seq = 1;
-    let runningTime = 0;
 
     const dynamicArrTimes = dynamicSolution?.routeMetrics?.[safeSelectedVehicle]?.arrival_times;
+    const computedArrTimes = getRouteArrivalTimes(r, dayMatrix, scenario, simParams.trafficMultiplier, dayOrders);
 
     return r.map((node, i) => {
       const isDepot = node === 0;
@@ -853,19 +893,11 @@ export default function App() {
       const c = coordsMap[node] || {};
       const ord = dayOrders[String(node)] || {};
 
-      let arrMin = 0;
-      if (dynamicArrTimes && dynamicArrTimes[i] !== undefined) {
-        arrMin = Math.round(dynamicArrTimes[i]);
-      } else {
-        runningTime += isDepot ? 0 : (ord.service_time || 8) + 14;
-        arrMin = runningTime;
-      }
+      const arrMin = (dynamicArrTimes && dynamicArrTimes[i] !== undefined)
+        ? Math.round(dynamicArrTimes[i])
+        : (computedArrTimes[i] || 0);
 
-      const etaHour = 8 + Math.floor(arrMin / 60);
-      const etaMin = arrMin % 60;
-      const period = etaHour >= 12 ? 'PM' : 'AM';
-      const displayHour = etaHour > 12 ? etaHour - 12 : (etaHour === 0 ? 12 : etaHour);
-      const etaStr = `${displayHour.toString().padStart(2, '0')}:${etaMin.toString().padStart(2, '0')} ${period}`;
+      const etaStr = formatMinuteToClock(arrMin);
       const isLate = !isDepot && ord.lat && arrMin > ord.lat;
 
       return {
@@ -888,7 +920,7 @@ export default function App() {
         latenessMin: isLate ? Math.round(arrMin - ord.lat) : 0
       };
     });
-  }, [routes, safeSelectedVehicle, coordsMap, dayOrders, dynamicSolution]);
+  }, [routes, safeSelectedVehicle, coordsMap, dayOrders, dynamicSolution, dayMatrix, scenario, simParams.trafficMultiplier]);
 
   // Filtered Clinic Manifest
   const filteredManifest = useMemo(() => {
@@ -2141,7 +2173,7 @@ export default function App() {
                   const vColor = FLEET_COLORS[vIdx % FLEET_COLORS.length];
                   const stops = route.filter(n => n !== 0);
                   const maxShift = simParams.maxShiftDuration || 360;
-                  let curTime = 15;
+                  const routeArrTimes = getRouteArrivalTimes(route, dayMatrix, scenario, simParams.trafficMultiplier, dayOrders);
 
                   return (
                     <div key={vIdx} className="gantt-lane">
@@ -2153,11 +2185,11 @@ export default function App() {
                       <div className="gantt-track">
                         {stops.map((node, sIdx) => {
                           const ord = dayOrders[String(node)] || {};
-                          curTime += (ord.service_time || 8) + 12;
-                          const arrMin = dynamicSolution?.routeMetrics?.[vIdx]?.arrival_times?.[sIdx + 1] ?? curTime;
+                          const dynArr = dynamicSolution?.routeMetrics?.[vIdx]?.arrival_times?.[sIdx + 1];
+                          const arrMin = dynArr !== undefined ? Math.round(dynArr) : (routeArrTimes[sIdx + 1] || 0);
                           const isLate = ord.lat && arrMin > ord.lat;
                           const leftPct = Math.min((arrMin / maxShift) * 100, 96);
-                          const widthPct = Math.max(((ord.service_time || 8) / maxShift) * 100, 2.5);
+                          const widthPct = Math.max(((ord.service_time || 6) / maxShift) * 100, 2.5);
 
                           return (
                             <div 
@@ -2169,7 +2201,7 @@ export default function App() {
                                 backgroundColor: isLate ? '#f43f5e' : vColor,
                                 border: isLate ? '1px solid #ffffff' : 'none'
                               }}
-                              title={`Stop #${sIdx + 1}: Node ${node} • ETA +${Math.round(arrMin)}m • Window [${ord.eat}-${ord.lat}]m${isLate ? ` (⚠️ LATE by ${Math.round(arrMin - ord.lat)}m)` : ' (✓ On Time)'}`}
+                              title={`Stop #${sIdx + 1}: Node ${node} • ETA ${formatMinuteToClock(arrMin)} (+${Math.round(arrMin)}m) • Window [${ord.eat}-${ord.lat}]m${isLate ? ` (⚠️ LATE by ${Math.round(arrMin - ord.lat)}m)` : ' (✓ On Time)'}`}
                             >
                               {sIdx + 1}
                             </div>
